@@ -1,0 +1,11 @@
+.venv/
+.DS_Store
+20*.nc
+predicitions/aurora
+predicitions/graphcast
+weather_data/archive/*
+weather_data/aurora/*
+weather_data/graphcast/*
+*.csv
+*.npz
+test/
