@@ -13,7 +13,6 @@ Model weights and normalization statistics for GraphCast have been provided; tho
 ## Prerequisites
 
 * You must register an account with the [Climate Data Store](https://cds.climate.copernicus.eu/how-to-api) and follow their steps for setting up your API Key according to your operating system.
-  * Note from Developers: There **MIGHT** be some packages that do NOT get downloaded even after using both commands. Therefore, we kindly ask that you download whatever may be needed until we can build a comprehensive list of every dependency needed. One of these can be google cloud storage; if this is the case, use `pip install google-cloud-storage`.
 * Microsoft's Aurora seems to only use CUDA architecture, meaning that if you do not possess an Nvidia GPU, it is **HIGHLY RECOMMENDED** you use the graphcast model. 
 * As of October 05, 2024, `weather.py` and both models only use data from a predefined date and output a forecast for a predetermined time as well. The team plans on changing this in the future, but if you currently already have the computer skills to do so, you may change it **AT YOUR OWN RISK**
 
@@ -25,6 +24,8 @@ Model weights and normalization statistics for GraphCast have been provided; tho
 2. Create a Python Virtual Enviroment and Download Required Packages
    
    In the main directory, run `python3 -m venv .venv` to create the folder, run `source .venv/bin/activate` to enter the virtual environment, and download all the necessary packages by using the commands `pip install --upgrade https://github.com/deepmind/graphcast/archive/master.zip` for GraphCast and `pip install microsoft-aurora` for Aurora. It is **recommded** that you use both commands, as some packages found with Aurora may be in the files for GraphCast and vice versa.
+
+   * Note from Developers: There **MIGHT** be some packages that do NOT get downloaded even after using both commands. Therefore, we kindly ask that you download whatever may be needed until we can build a comprehensive list of every dependency needed. One of these can be google cloud storage; if this is the case, use `pip install google-cloud-storage`.
 
 3. Run setup.py
 
@@ -40,7 +41,7 @@ Model weights and normalization statistics for GraphCast have been provided; tho
 
 ## Disclaimer:
 
-    Since our team is barely starting this project and getting used to everything, there is still A LOT we do not know. This, unfortunately, does extend to the main files themselves. We aim to learn more about the intricacies of each model, how they work, and how we can modify them for our use case.
+   **Since** our team is barely starting this project and getting used to everything, there is still A LOT we do not know. This, unfortunately, does extend to the main files themselves. We aim to learn more about the intricacies of each model, how they work, and how we can modify them for our use case.
    
    
 
