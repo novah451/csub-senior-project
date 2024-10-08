@@ -362,4 +362,4 @@ if __name__ == '__main__':
     predictions = Predictor.predict(values['inputs'], values['targets'], values['forcings'])
     predictions.to_dataframe().to_csv('predictions/graphcast/predictions.csv', sep=',')
 
-    print("This file works!")
+    print("A Prediction Has Been Made!")
