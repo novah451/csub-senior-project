@@ -11,20 +11,20 @@ We have provided code that use the following pretrained models:
 ## Prerequisites
 
 * You must register an account with the [Climate Data Store](https://cds.climate.copernicus.eu/how-to-api) and follow their steps for setting up your API Key according to your operating system.
-* Microsoft's Aurora seems to only use CUDA architecture, meaning that if you do not possess an Nvidia GPU, it is **HIGHLY RECOMMENDED** you use the graphcast model. 
+* Microsoft's Aurora seems to only use CUDA architecture for now. Therefore, if you are not using a Nvidia GPU, you can **ONLY** use the graphcast model. 
 * NOTICE: `weather.py` and both models only use data from a predefined date and output a forecast for a predetermined time as well. The team plans on changing this in the future, but if you currently already have the computer skills to do so, you may change it **AT YOUR OWN RISK**
 
 ## Steps-to-Follow
 1. Download the repository
 
-    You can download the repository as either a zip file or by cloning using Git.
+   You can download the repository as either a zip file or by cloning using Git.
 
 2. Create a Python Virtual Enviroment and Download Required Packages
    
-   In the main directory, run `python3 -m venv .venv` to create the folder, run `source .venv/bin/activate` to enter the virtual environment, and download all the necessary packages by using the commands `pip install --upgrade https://github.com/deepmind/graphcast/archive/master.zip` for GraphCast and `pip install microsoft-aurora` for Aurora. It is **recommded** that you use both commands, as some packages found with Aurora may be in the files for GraphCast and vice versa.
+   In the main directory, run `python3 -m venv .venv` to create the folder and use `source .venv/bin/activate` to enter the virtual environment. To download all the necessary packages, use the command `pip install -r requirements.txt`.
 
-   * Note from Developers: There **MIGHT** be some packages that do NOT get downloaded even after using both commands. Therefore, we kindly ask that you download whatever may be needed until we can build a comprehensive list of every dependency needed. One of these can be google cloud storage; if this is the case, use `pip install google-cloud-storage`.
-
+   * Note from Developers: Some packages required to run the Aurora model are **NOT** included in the requirements.txt document. If you would like to run this model, run the command `pip install microsoft-aurora`, which should download the few remaining packages needed (mainly Nvidia-based dependencies).
+  
 3. Run the setup file: `python3 setup.py`
 
    Running this file generates the folder structure required for the program. It also downloads any files required by either model to work locally.
