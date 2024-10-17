@@ -1,0 +1,40 @@
+city,latitude,longitude,co,no,no2,o3,so2,pm2_5,pm10,aqi
+Arvin,35.209167,-118.828333,null,null,null,null,null,null,null,null
+Bakersfield,35.373333,-119.018889,null,null,null,null,null,null,null,null
+Bodfish,35.588056,-118.491944,null,null,null,null,null,null,null,null
+Buttonwillow,35.400556,-119.469444,null,null,null,null,null,null,null,null
+Caliente,35.291111,-118.627778,null,null,null,null,null,null,null,null
+California City,35.125833,-117.985833,null,null,null,null,null,null,null,null
+Cantil,35.308889,-117.968333,null,null,null,null,null,null,null,null
+Delano,35.768889,-119.246944,null,null,null,null,null,null,null,null
+Edison,35.347314,-118.869825,null,null,null,null,null,null,null,null
+Edwards,34.926111,-117.935,null,null,null,null,null,null,null,null
+Fellows,35.178611,-119.541111,null,null,null,null,null,null,null,null
+Frazier Park,34.822778,-118.944722,null,null,null,null,null,null,null,null
+Glennville,35.724194,-118.715217,null,null,null,null,null,null,null,null
+Inyokern,35.646944,-117.8125,null,null,null,null,null,null,null,null
+Johannesburg,35.372778,-117.634722,null,null,null,null,null,null,null,null
+Keene,35.223611,-118.562222,null,null,null,null,null,null,null,null
+Kernville,35.754722,-118.425278,null,null,null,null,null,null,null,null
+Lake Isabella,35.618056,-118.473056,null,null,null,null,null,null,null,null
+Lamont,35.259722,-118.914167,null,null,null,null,null,null,null,null
+Lebec,34.842342,-118.865558,null,null,null,null,null,null,null,null
+Lost Hills,35.616389,-119.694167,null,null,null,null,null,null,null,null
+Maricopa,35.058889,-119.400833,null,null,null,null,null,null,null,null
+McFarland,35.678056,-119.229167,null,null,null,null,null,null,null,null
+McKittrick,35.305556,-119.6225,null,null,null,null,null,null,null,null
+Mojave,35.0525,-118.173889,null,null,null,null,null,null,null,null
+Onyx,35.690278,-118.220556,null,null,null,null,null,null,null,null
+Pine Mountain Club,34.846944,-119.156667,null,null,null,null,null,null,null,null
+Randsburg,35.368611,-117.658056,null,null,null,null,null,null,null,null
+Red Mountain,35.358333,-117.616667,null,null,null,null,null,null,null,null
+Ridgecrest,35.6225,-117.670833,null,null,null,null,null,null,null,null
+Rosamond,34.864167,-118.163333,null,null,null,null,null,null,null,null
+Shafter,35.500556,-119.271667,null,null,null,null,null,null,null,null
+Taft,35.1425,-119.456389,null,null,null,null,null,null,null,null
+Tehachapi,35.132222,-118.448889,null,null,null,null,null,null,null,null
+Tupman,35.298056,-119.351111,null,null,null,null,null,null,null,null
+Wasco,35.594167,-119.340833,null,null,null,null,null,null,null,null
+Weldon,35.665833,-118.290278,null,null,null,null,null,null,null,null
+Wofford Heights,35.706944,-118.456111,null,null,null,null,null,null,null,null
+Woody,35.708148,-118.814396,null,null,null,null,null,null,null,null
