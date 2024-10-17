@@ -37,6 +37,11 @@ We have provided code that use the following pretrained models:
 
    Run `python3 aurora_normal.py` to use the **Aurora** model or `python3 graphcast_small.py` for **GraphCast**. For now, `aurora_normal.py` generates a predicted forcast for 2023-01-02 across 12 hours, while `graphcast_small.py` generates a forecast for 2024-01-02 across 18 hours seperated into 4 sections [00:00, 06:00, 12:00, 18:00].
 
+6. Filter the graphcast predictions to show Kern County, California only
+
+   After running the previous steps, run `python3 filerKernData.py` that will access the predictions directory and filter the data using Kern County latitude (34-36) and longitude (239-242). This will make a new
+csv file called `kernPredictions.csv` that will of course include the weather predictions for Kern County only. 
+
 ## Disclaimer:
 
    This project is still in the very early stages of devlopment. We plan on adding more/doing more with what we have provided. There is still A LOT we do not know. As development continues, we plan on updating this respository with any new features that we add/come up with.
