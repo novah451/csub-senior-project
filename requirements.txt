@@ -30,7 +30,7 @@ google-cloud-storage==2.18.2
 google-crc32c==1.6.0
 google-resumable-media==2.7.2
 googleapis-common-protos==1.65.0
-graphcast @ https://github.com/deepmind/graphcast/archive/master.zip#sha256=821bf069bdd9b505262413eb3c93b4f340cf51061b6c1854b87a59e0e691259d
+graphcast @ https://github.com/deepmind/graphcast/archive/master.zip
 huggingface-hub==0.25.1
 humanize==4.10.0
 idna==3.10
