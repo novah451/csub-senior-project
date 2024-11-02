@@ -2,13 +2,32 @@ from aurora import Aurora
 from aurora import Batch
 from aurora import Metadata
 from aurora import rollout
+from borealiscli import print_wtime
+from borealiscli import print_wspace
+import datetime
 import matplotlib.pyplot as plt
+import numpy as np
+import os
 from pathlib import Path
+import pandas as pd
+import time
 import torch
 import xarray as xr
 
+print_wtime(f"Program PID: {os.getpid()}")
+
 # Path towards the weather data SPECIFIC TO AURORA
 path = Path("weather_data/aurora")
+
+# Path towards where the predictions are saved
+SAVE = "predictions/aurora/predictions.csv"
+
+# How many predictions will be made
+STEPS = 2
+
+# Total Number of Pressure Levels
+ALV = [(12, 50), (11, 100), (10, 150), (9, 200), (8, 250), (7, 300), 
+       (6, 400), (5, 500), (4, 600), (3, 700), (2, 850), (1, 925), (0, 1000)]
 
 '''Preparing a Batch'''
 # Convert the downloaded data to an aurora.Batch -> required by model
@@ -18,6 +37,8 @@ atmos_vars_ds = xr.open_dataset(path / "2023-01-01-atmospheric.nc", engine='netc
 
 # Select this time index in the downloaded data
 i = 1
+
+print_wtime(f"Building Batch")
 
 # Building the batch itself
 batch = Batch(
@@ -52,36 +73,135 @@ batch = Batch(
     ),
 )
 
+print_wtime(f"Batched Built. Loading Model...")
+
 '''Loading and Running the Model'''
 # the pretrained version does not use LoRA
 model = Aurora(use_lora=False)
 model.load_checkpoint("microsoft/aurora", "aurora-0.25-pretrained.ckpt")
 
+# Set model to evalulation mode
 model.eval()
-model = model.to("cuda")
-
-with torch.inference_mode():
-    preds = [pred.to("cpu") for pred in rollout(model, batch, steps=2)]
 
 model = model.to("cpu")
 
-'''Plotting the Predictions'''
-flg, ax = plt.subplots(2, 2, flgsize=(12, 6.5))
+print_wtime(f"Model Loaded and Ready. Running Model...")
+print_wtime("NOTICE: THE FOLLOWING FEW STEPS WILL TAKE A MINUTE. PLEASE BE PATIENT :)")
+wt_start = time.time()
+pt_start = time.process_time()
 
-for i in range(ax.shape[0]):
-    pred = preds[i]
+with torch.inference_mode():
+    preds = [pred.to("cpu") for pred in rollout(model, batch, steps=STEPS)]
 
-    ax[i, 0].imshow(pred.surf_vars["2t"][0, 0].numpy() - 273.15, vmin=-50, vmax=50)
-    ax[i, 0].set_ylabel(str(pred.metadata.time[0]))
-    if i == 0:
-        ax[i, 0].set_title("Aurora Prediction")
-    ax[i, 0].set_xticks([])
-    ax[i, 0].set_yticks([])
+wt_end = time.time()
+pt_end = time.process_time()
+wt_total = wt_end - wt_start
+pt_total = pt_end - pt_start
+print_wtime(f"Model finished running. Predictions have been made!")
+print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
+print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+print_wtime(f"Saving Predictions to Dictionary...")
 
-    ax[i, 1].imshow(surf_vars_ds["t2m"][2 + i].values - 273.15, vmin=-50, vmax=50)
-    if i == 0:
-        ax[i, 1].set_title("ERA5")
-    ax[i, 1].set_xticks([])
-    ax[i, 1].set_yticks([])
+columns = [
+    # Metadata
+    "time",
+    "lat", 
+    "lon", 
+    "level", 
+    # Surface Level Variables
+    "2m_temperature", 
+    "10m_u_component_of_wind",
+    "10m_v_component_of_wind",
+    "mean_sea_level_pressure",
+    # Static Variables
+    "land_sea_mask",
+    "soil_type",
+    "surface_geopotential",
+    # Atmospheric Variables
+    "temperature",
+    "u_component_of_wind", 
+    "v_component_of_wind", 
+    "specific_humidity",
+    "geopotential"
+]
 
-plt.tight_layout()
+# aurora_df = pd.DataFrame(columns=columns)
+LAT = np.arange(90, -90, -0.25)
+LON = np.arange(0, 360, 0.25)
+entry = 0
+query_dict = {}
+
+for i in range(0, STEPS):
+    print_wtime(f"Processing Batch {i}...")
+    prediction = preds[i]
+
+    # print(f"Reading Data for ({ln}, {lt}, {atmos_lvl}) from Batch...")
+    wt_start = time.time()
+    pt_start = time.process_time()
+
+    # Surface and Static Only
+    for ind_lt, lt in enumerate(LAT):
+        for ind_ln, ln in enumerate(LON):
+            for ind_apl, atmos_lvl in ALV:
+                query_data = [
+                    prediction.metadata.time[0],
+                    float(lt),
+                    float(ln),
+                    atmos_lvl,
+                    float(prediction.surf_vars["2t"][0, 0, ind_lt, ind_ln]),
+                    float(prediction.surf_vars["10u"][0, 0, ind_lt, ind_ln]),
+                    float(prediction.surf_vars["10v"][0, 0, ind_lt, ind_ln]),
+                    float(prediction.surf_vars["msl"][0, 0, ind_lt, ind_ln]),
+                    float(prediction.static_vars["lsm"][ind_lt, ind_ln]),
+                    float(prediction.static_vars["slt"][ind_lt, ind_ln]),
+                    float(prediction.static_vars["z"][ind_lt, ind_ln]),
+                    float(prediction.atmos_vars["t"][0, 0, ind_apl, ind_lt, ind_ln]),
+                    float(prediction.atmos_vars["u"][0, 0, ind_apl, ind_lt, ind_ln]),
+                    float(prediction.atmos_vars["v"][0, 0, ind_apl, ind_lt, ind_ln]), 
+                    float(prediction.atmos_vars["q"][0, 0, ind_apl, ind_lt, ind_ln]),
+                    float(prediction.atmos_vars["z"][0, 0, ind_apl, ind_lt, ind_ln])
+                ]
+
+                query_dict[entry] = query_data
+                entry += 1
+
+    wt_end = time.time()
+    pt_end = time.process_time()
+    wt_total = wt_end - wt_start
+    pt_total = pt_end - pt_start
+    print_wtime(f"Batch {i} Processed!")
+    print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
+    print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+
+print_wtime(f"Predictions are now stored in Dictionary!")
+print_wtime(f"Proceeding to saving Dictionary as Dataframe...")
+
+wt_start = time.time()
+pt_start = time.process_time()
+
+aurora_df = pd.DataFrame.from_dict(query_dict, orient="index", columns=columns)
+
+wt_end = time.time()
+pt_end = time.process_time()
+wt_total = wt_end - wt_start
+pt_total = pt_end - pt_start
+print_wtime(f"Dictionary has been saved as Dataframe!")
+print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
+print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+
+print_wtime(f"Proceeding to saving Dataframe as CSV...")
+
+wt_start = time.time()
+pt_start = time.process_time()
+
+aurora_df.to_csv(SAVE, sep=",", index=False)
+
+wt_end = time.time()
+pt_end = time.process_time()
+wt_total = wt_end - wt_start
+pt_total = pt_end - pt_start
+print_wtime(f"Dataframe has been saved as CSV!")
+print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
+print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+
+print("\n", aurora_df, "\n")

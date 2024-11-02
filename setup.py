@@ -1,3 +1,4 @@
+from borealiscli import print_wtime
 from pathlib import Path
 from os import makedirs
 from google.cloud import storage
@@ -11,7 +12,8 @@ def setup_log():
         makedirs(log_path / "graphcast")
         print("[+]    Log Folder Successfully Created ...")
     else:
-        print("[!]    Log Folder Detected! No Further Action Required ...")
+        # print("[!]    Log Folder Detected! No Further Action Required ...")
+        print_wtime("Log Folder Detected! No Further Action Required ...")
 
 def setup_model():
     model_path = Path("model/")
@@ -31,18 +33,19 @@ def setup_model():
         # Create a bucket object for our bucket
         bucket = storage_client.get_bucket("dm_graphcast")
         # Create a blob object from the filepath
-        blob_1 = bucket.blob("params/GraphCast_small - ERA5 1979-2015 - resolution 1.0 - pressure levels 13 - mesh 2to5 - precipitation input and output.npz")
+        blob_1 = bucket.blob("params/GraphCast - ERA5 1979-2017 - resolution 0.25 - pressure levels 37 - mesh 2to6 - precipitation input and output.npz")
         blob_2 = bucket.blob("stats/diffs_stddev_by_level.nc")
         blob_3 = bucket.blob("stats/mean_by_level.nc")
         blob_4 = bucket.blob("stats/stddev_by_level.nc")
         # Download the file to a destination
-        blob_1.download_to_filename(model_path / "graphcast/params/GraphCast_small - ERA5 1979-2015 - resolution 1.0 - pressure levels 13 - mesh 2to5 - precipitation input and output.npz")
+        blob_1.download_to_filename(model_path / "graphcast/params/GraphCast - ERA5 1979-2017 - resolution 0.25 - pressure levels 37 - mesh 2to6 - precipitation input and output.npz")
         blob_2.download_to_filename(model_path / "graphcast/stats/diffs_stddev_by_level.nc")
         blob_3.download_to_filename(model_path / "graphcast/stats/mean_by_level.nc")
         blob_4.download_to_filename(model_path / "graphcast/stats/stddev_by_level.nc")
         print("[+]    All Required GraphCast Files Downloaded ...")
     else:
-        print("[!]    Model Folder Detected! No Further Action Required ...")
+        # print("[!]    Model Folder Detected! No Further Action Required ...")
+        print_wtime("Model Folder Detected! No Further Action Required ...")
 
 def setup_prediction():
     prediction_path = Path("predictions/")
@@ -53,7 +56,8 @@ def setup_prediction():
         makedirs(prediction_path / "graphcast")
         print("[+]    Prediction Folder Successfully Created ...")
     else:
-        print("[!]    Prediction Folder Detected! No Further Action Required ...")
+        # print("[!]    Prediction Folder Detected! No Further Action Required ...")
+        print_wtime("Prediction Folder Detected! No Further Action Required ...")
 
 def setup_weather():
     weather_path = Path("weather_data/")
@@ -65,7 +69,8 @@ def setup_weather():
         makedirs(weather_path / "graphcast")
         print("[+]    Weather Folder Successfully Created ...")
     else:
-        print("[!]    Weather Folder Detected! No Further Action Required ...")
+        # print("[!]    Weather Folder Detected! No Further Action Required ...")
+        print_wtime("Weather Folder Detected! No Further Action Required ...")
 
 if __name__ == "__main__":
     print("")

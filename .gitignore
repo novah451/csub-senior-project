@@ -1,13 +1,15 @@
-.venv/
+.venv
 .DS_Store
 .env
 
-log/
-model/
-predictions/
-test/
-weather_data/
+log
+model
+predictions
+test
+weather_data
+__pycache__
 
 *.csv
 *.nc
 *.npz
+*.json
