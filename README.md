@@ -56,6 +56,3 @@ We have provided code that use the following pretrained models:
 ## Disclaimer:
 
    This project is still in the very early stages of devlopment. We plan on adding more/doing more with what we have provided. There is still A LOT we do not know. As development continues, we plan on updating this respository with any new features that we add/come up with.
-   
-   
-
