@@ -2,28 +2,27 @@ from aurora import Aurora
 from aurora import Batch
 from aurora import Metadata
 from aurora import rollout
+from borealiscli import Clock
 from borealiscli import print_wtime
 from borealiscli import print_wspace
-import datetime
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 from pathlib import Path
 import pandas as pd
-import time
 import torch
 import xarray as xr
 
+clock = Clock()
 print_wtime(f"Program PID: {os.getpid()}")
 
 # Path towards the weather data SPECIFIC TO AURORA
 path = Path("weather_data/aurora")
 
 # Path towards where the predictions are saved
-SAVE = "predictions/aurora/predictions.csv"
+SAVE = "predictions/aurora/predictions_test.csv"
 
 # How many predictions will be made
-STEPS = 2
+STEPS = 4
 
 # Total Number of Pressure Levels
 ALV = [(12, 50), (11, 100), (10, 150), (9, 200), (8, 250), (7, 300), 
@@ -82,24 +81,16 @@ model.load_checkpoint("microsoft/aurora", "aurora-0.25-pretrained.ckpt")
 
 # Set model to evalulation mode
 model.eval()
-
 model = model.to("cpu")
 
 print_wtime(f"Model Loaded and Ready. Running Model...")
-print_wtime("NOTICE: THE FOLLOWING FEW STEPS WILL TAKE A MINUTE. PLEASE BE PATIENT :)")
-wt_start = time.time()
-pt_start = time.process_time()
+print_wspace("NOTICE: THE FOLLOWING FEW STEPS WILL TAKE A MINUTE. PLEASE BE PATIENT :)")
+clock.start()
 
 with torch.inference_mode():
     preds = [pred.to("cpu") for pred in rollout(model, batch, steps=STEPS)]
 
-wt_end = time.time()
-pt_end = time.process_time()
-wt_total = wt_end - wt_start
-pt_total = pt_end - pt_start
-print_wtime(f"Model finished running. Predictions have been made!")
-print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
-print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+clock.stop(f"Model finished running. Predictions have been made!")
 print_wtime(f"Saving Predictions to Dictionary...")
 
 columns = [
@@ -126,18 +117,16 @@ columns = [
 ]
 
 # aurora_df = pd.DataFrame(columns=columns)
-LAT = np.arange(90, -90, -0.25)
-LON = np.arange(0, 360, 0.25)
+LAT = np.arange(90, -90, -0.25, dtype='float32')
+LON = np.arange(0, 360, 0.25, dtype='float32')
 entry = 0
 query_dict = {}
 
 for i in range(0, STEPS):
-    print_wtime(f"Processing Batch {i}...")
     prediction = preds[i]
 
-    # print(f"Reading Data for ({ln}, {lt}, {atmos_lvl}) from Batch...")
-    wt_start = time.time()
-    pt_start = time.process_time()
+    print_wtime(f"Processing Batch {i}...")
+    clock.start()
 
     # Surface and Static Only
     for ind_lt, lt in enumerate(LAT):
@@ -145,9 +134,9 @@ for i in range(0, STEPS):
             for ind_apl, atmos_lvl in ALV:
                 query_data = [
                     prediction.metadata.time[0],
-                    float(lt),
-                    float(ln),
-                    atmos_lvl,
+                    lt,
+                    ln,
+                    np.int16(atmos_lvl),
                     float(prediction.surf_vars["2t"][0, 0, ind_lt, ind_ln]),
                     float(prediction.surf_vars["10u"][0, 0, ind_lt, ind_ln]),
                     float(prediction.surf_vars["10v"][0, 0, ind_lt, ind_ln]),
@@ -165,43 +154,43 @@ for i in range(0, STEPS):
                 query_dict[entry] = query_data
                 entry += 1
 
-    wt_end = time.time()
-    pt_end = time.process_time()
-    wt_total = wt_end - wt_start
-    pt_total = pt_end - pt_start
-    print_wtime(f"Batch {i} Processed!")
-    print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
-    print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+    clock.stop(f"Batch {i} Processed!")
 
-print_wtime(f"Predictions are now stored in Dictionary!")
+    # off-load query_dict to Dataframe at halfway point -> Prevent Crashing?
+    if i == 1:
+        print_wtime("2 out of 4 Batches Complete, Now Offloading to DataFrame...")
+        clock.start()
+        half_aurora_df = pd.DataFrame.from_dict(query_dict, orient="index", columns=columns)
+        # half_aurora_df[columns[4:]] = half_aurora_df[columns[4:]].astype('float32')
+        query_dict = {}
+        clock.stop("Offload Complete; Dictionary Wiped; Proceeding with the 2 remaining Batches...")
+
+del preds
+del batch
+
+print_wtime(f"Final Predictions are now stored in Dictionary!")
 print_wtime(f"Proceeding to saving Dictionary as Dataframe...")
-
-wt_start = time.time()
-pt_start = time.process_time()
+clock.start()
 
 aurora_df = pd.DataFrame.from_dict(query_dict, orient="index", columns=columns)
+# aurora_df[columns[4:]] = aurora_df[columns[4:]].astype('float32')
+del query_dict
 
-wt_end = time.time()
-pt_end = time.process_time()
-wt_total = wt_end - wt_start
-pt_total = pt_end - pt_start
-print_wtime(f"Dictionary has been saved as Dataframe!")
-print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
-print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+clock.stop("Dictionary has been saved as Dataframe!")
+
+print_wtime("Now concatenating the two DataFrames into one...")
+clock.start()
+
+aurora_df = pd.concat([half_aurora_df, aurora_df], ignore_index=True)
+del half_aurora_df
+
+clock.stop("Both DataFrames successfully merged!")
 
 print_wtime(f"Proceeding to saving Dataframe as CSV...")
-
-wt_start = time.time()
-pt_start = time.process_time()
+clock.start()
 
 aurora_df.to_csv(SAVE, sep=",", index=False)
 
-wt_end = time.time()
-pt_end = time.process_time()
-wt_total = wt_end - wt_start
-pt_total = pt_end - pt_start
-print_wtime(f"Dataframe has been saved as CSV!")
-print_wspace(f"Total Wall Time: {datetime.timedelta(seconds=round(wt_total, 6))}")
-print_wspace(f"Total CPU Time: {datetime.timedelta(seconds=round(pt_total, 6))}")
+clock.stop("Dataframe has been saved as CSV!")
 
 print("\n", aurora_df, "\n")
