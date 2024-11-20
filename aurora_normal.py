@@ -2,9 +2,8 @@ from aurora import Aurora
 from aurora import Batch
 from aurora import Metadata
 from aurora import rollout
-from borealiscli import Clock
-from borealiscli import print_wtime
-from borealiscli import print_wspace
+from borealis import Clock
+from borealis import PrettyCLI
 import numpy as np
 import os
 from pathlib import Path
@@ -13,7 +12,7 @@ import torch
 import xarray as xr
 
 clock = Clock()
-print_wtime(f"Program PID: {os.getpid()}")
+PrettyCLI.tprint(f"Program PID: {os.getpid()}")
 
 # Path towards the weather data SPECIFIC TO AURORA
 path = Path("weather_data/aurora")
@@ -31,13 +30,13 @@ ALV = [(12, 50), (11, 100), (10, 150), (9, 200), (8, 250), (7, 300),
 '''Preparing a Batch'''
 # Convert the downloaded data to an aurora.Batch -> required by model
 static_vars_ds = xr.open_dataset(path / "static.nc", engine='netcdf4')
-surf_vars_ds = xr.open_dataset(path / "2024-11-01-surface-level.nc", engine='netcdf4')
-atmos_vars_ds = xr.open_dataset(path / "2024-11-01-atmospheric.nc", engine='netcdf4')
+surf_vars_ds = xr.open_dataset(path / "2024-11-08-surface-level.nc", engine='netcdf4')
+atmos_vars_ds = xr.open_dataset(path / "2024-11-08-atmospheric.nc", engine='netcdf4')
 
 # Select this time index in the downloaded data
 i = 1
 
-print_wtime(f"Building Batch")
+PrettyCLI.tprint(f"Building Batch")
 
 # Building the batch itself
 batch = Batch(
@@ -76,7 +75,7 @@ batch = Batch(
     ),
 )
 
-print_wtime(f"Batched Built. Loading Model...")
+PrettyCLI.tprint(f"Batched Built. Loading Model...")
 
 '''Loading and Running the Model'''
 # the pretrained version does not use LoRA
@@ -87,15 +86,15 @@ model.load_checkpoint("microsoft/aurora", "aurora-0.25-pretrained.ckpt")
 model.eval()
 model = model.to("cpu")
 
-print_wtime(f"Model Loaded and Ready. Running Model...")
-print_wspace("NOTICE: THE FOLLOWING FEW STEPS WILL TAKE A MINUTE. PLEASE BE PATIENT :)")
+PrettyCLI.tprint(f"Model Loaded and Ready. Running Model...")
+PrettyCLI.spprint("NOTICE: THE FOLLOWING FEW STEPS WILL TAKE A MINUTE. PLEASE BE PATIENT :)")
 clock.start()
 
 with torch.inference_mode():
     preds = [pred.to("cpu") for pred in rollout(model, batch, steps=STEPS)]
 
 clock.stop(f"Model finished running. Predictions have been made!")
-print_wtime(f"Saving Predictions to Dictionary...")
+PrettyCLI.tprint(f"Saving Predictions to Dictionary...")
 
 columns = [
     # Metadata
@@ -129,7 +128,7 @@ query_dict = {}
 for i in range(0, STEPS):
     prediction = preds[i]
 
-    print_wtime(f"Processing Batch {i}...")
+    PrettyCLI.tprint(f"Processing Batch {i}...")
     clock.start()
 
     # Surface and Static Only
@@ -162,7 +161,7 @@ for i in range(0, STEPS):
 
     # off-load query_dict to Dataframe at halfway point -> Prevent Crashing?
     if i == 1:
-        print_wtime("2 out of 4 Batches Complete, Now Offloading to DataFrame...")
+        PrettyCLI.tprint("2 out of 4 Batches Complete, Now Offloading to DataFrame...")
         clock.start()
         half_aurora_df = pd.DataFrame.from_dict(query_dict, orient="index", columns=columns)
         # half_aurora_df[columns[4:]] = half_aurora_df[columns[4:]].astype('float32')
@@ -173,8 +172,8 @@ for i in range(0, STEPS):
 del preds
 del batch
 
-print_wtime(f"Final Predictions are now stored in Dictionary!")
-print_wtime(f"Proceeding to saving Dictionary as Dataframe...")
+PrettyCLI.tprint(f"Final Predictions are now stored in Dictionary!")
+PrettyCLI.tprint(f"Proceeding to saving Dictionary as Dataframe...")
 clock.start()
 
 aurora_df = pd.DataFrame.from_dict(query_dict, orient="index", columns=columns)
@@ -183,7 +182,7 @@ del query_dict
 
 clock.stop("Dictionary has been saved as Dataframe!")
 
-print_wtime("Now concatenating the two DataFrames into one...")
+PrettyCLI.tprint("Now concatenating the two DataFrames into one...")
 clock.start()
 
 aurora_df = pd.concat([half_aurora_df, aurora_df], ignore_index=True)
@@ -191,7 +190,7 @@ del half_aurora_df
 
 clock.stop("Both DataFrames successfully merged!")
 
-print_wtime(f"Proceeding to saving Dataframe as CSV...")
+PrettyCLI.tprint(f"Proceeding to saving Dataframe as CSV...")
 clock.start()
 
 aurora_df.to_csv(SAVE, sep=",", index=False)

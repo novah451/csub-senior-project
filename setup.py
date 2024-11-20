@@ -1,81 +1,33 @@
-from borealiscli import print_wtime
-from pathlib import Path
-from os import makedirs
-from google.cloud import storage
+from borealis import setup_folders
+from borealis import PrettyCLI
+from borealis import download_weather
 
-def setup_log():
-    log_path = Path("log/")
-    if not log_path.exists():
-        print("[~]    No Log Folder Detected. Generating ...")
-        log_path.mkdir(parents=True, exist_ok=True)
-        makedirs(log_path / "aurora")
-        makedirs(log_path / "graphcast")
-        print("[+]    Log Folder Successfully Created ...")
+PrettyCLI.tprint("Hello! This is the setup script from Project Borealis \n")
+
+# 1. Setup the folder structure
+setup_folders()
+
+# 2. Ask the user which model they want to use; determines how weather input is downloaded
+PrettyCLI.tprint("Excellent! Now, which model do you intend on using?")
+PrettyCLI.spprint("[1] Aurora")
+PrettyCLI.spprint("[2] GraphCast")
+PrettyCLI.spprint("[3] Both")
+
+while True:
+    try:
+        dataset = PrettyCLI.tinput("Option: ")
+    except ValueError:
+        PrettyCLI.spprint("Sorry, I didn't understand that.")
+        continue
     else:
-        # print("[!]    Log Folder Detected! No Further Action Required ...")
-        print_wtime("Log Folder Detected! No Further Action Required ...")
+        if dataset not in range(1, 4):
+            PrettyCLI.spprint("Not a valid option, Try Again")
+            continue
+        else:
+            PrettyCLI.tprint("Very well, getting right to it\n")
+            break
 
-def setup_model():
-    model_path = Path("model/")
-    if not model_path.exists():
-        print("[~]    No model folder detected. Generating ...")
-        '''Setup subdirectories'''
-        model_path.mkdir(parents=True, exist_ok=True)
-        makedirs(model_path / "aurora")
-        makedirs(model_path / "graphcast")
-        makedirs(model_path / "graphcast/params")
-        makedirs(model_path / "graphcast/stats")
-        print("[+]    Model Folder Successfully Created ...")
-        '''Add files for GraphCast'''
-        print("[~]    Adding Required Files for GraphCast. THIS MAY TAKE A MINUTE ...")
-        # Initialise a client
-        storage_client = storage.Client.create_anonymous_client()
-        # Create a bucket object for our bucket
-        bucket = storage_client.get_bucket("dm_graphcast")
-        # Create a blob object from the filepath
-        blob_1 = bucket.blob("params/GraphCast - ERA5 1979-2017 - resolution 0.25 - pressure levels 37 - mesh 2to6 - precipitation input and output.npz")
-        blob_2 = bucket.blob("stats/diffs_stddev_by_level.nc")
-        blob_3 = bucket.blob("stats/mean_by_level.nc")
-        blob_4 = bucket.blob("stats/stddev_by_level.nc")
-        # Download the file to a destination
-        blob_1.download_to_filename(model_path / "graphcast/params/GraphCast - ERA5 1979-2017 - resolution 0.25 - pressure levels 37 - mesh 2to6 - precipitation input and output.npz")
-        blob_2.download_to_filename(model_path / "graphcast/stats/diffs_stddev_by_level.nc")
-        blob_3.download_to_filename(model_path / "graphcast/stats/mean_by_level.nc")
-        blob_4.download_to_filename(model_path / "graphcast/stats/stddev_by_level.nc")
-        print("[+]    All Required GraphCast Files Downloaded ...")
-    else:
-        # print("[!]    Model Folder Detected! No Further Action Required ...")
-        print_wtime("Model Folder Detected! No Further Action Required ...")
+download_weather(dataset)
+PrettyCLI.tprint("Requested weather input data successfully downloaded!")
 
-def setup_prediction():
-    prediction_path = Path("predictions/")
-    if not prediction_path.exists():
-        print("[~]    No Prediction Folder Detected. Generating ...")
-        prediction_path.mkdir(parents=True, exist_ok=True)
-        makedirs(prediction_path / "aurora")
-        makedirs(prediction_path / "graphcast")
-        print("[+]    Prediction Folder Successfully Created ...")
-    else:
-        # print("[!]    Prediction Folder Detected! No Further Action Required ...")
-        print_wtime("Prediction Folder Detected! No Further Action Required ...")
-
-def setup_weather():
-    weather_path = Path("weather_data/")
-    if not weather_path.exists():
-        print("[~]    No Weather Folder Detected. Generating ...")
-        weather_path.mkdir(parents=True, exist_ok=True)
-        makedirs(weather_path / "archive")
-        makedirs(weather_path / "aurora")
-        makedirs(weather_path / "graphcast")
-        print("[+]    Weather Folder Successfully Created ...")
-    else:
-        # print("[!]    Weather Folder Detected! No Further Action Required ...")
-        print_wtime("Weather Folder Detected! No Further Action Required ...")
-
-if __name__ == "__main__":
-    print("")
-    setup_log()
-    setup_model()
-    setup_prediction()
-    setup_weather()
-    print("")
+# 3. Download and save AQI data for kern county

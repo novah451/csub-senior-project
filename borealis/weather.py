@@ -2,17 +2,9 @@ import cdsapi
 from pathlib import Path
 from sys import argv
 
-if argv[1] != "aurora" and argv[1] != "graphcast":
-    print("Command line argument is not a valid option, try again\n")
-    exit(0)
+__all__ = ["download_weather"]
 
-# Data will be downloaded here
-download_path = Path(f"weather_data/{argv[1]}")
-
-# Connect to the CDS API
-c = cdsapi.Client()
-
-def gather_data_for_graphcast():
+def gather_data_for_graphcast(download_path: Path, c: cdsapi.Client):
     # Fields to be fetched from the single-level source
     single_level_fields = [
         '10m_u_component_of_wind',
@@ -81,7 +73,7 @@ def gather_data_for_graphcast():
     else:
         print("Pressure-Level Variables Already Downloaded!")
 
-def gather_data_for_aurora():
+def gather_data_for_aurora(download_path: Path, c: cdsapi.Client):
     # Static Variables to be fetched from the single-level source
     static_fields = [
         'geopotential',
@@ -118,7 +110,7 @@ def gather_data_for_aurora():
                 "variable": static_fields,
                 "year": "2024",
                 "month": "11",
-                "day": "01",
+                "day": "08",
                 "time": "00:00",
                 "format": "netcdf",
             },
@@ -129,7 +121,7 @@ def gather_data_for_aurora():
         print("Static variables already downloaded!")
     
     # Download the surface-level variables.
-    if not (download_path / "2024-11-01-surface-level.nc").exists():
+    if not (download_path / "2024-11-08-surface-level.nc").exists():
         c.retrieve(
             "reanalysis-era5-single-levels",
             {
@@ -142,14 +134,14 @@ def gather_data_for_aurora():
                 # "time": ["00:00", "06:00", "12:00", "18:00"],
                 "format": "netcdf",
             },
-            str(download_path / "2024-11-01-surface-level.nc"),
+            str(download_path / "2024-11-08-surface-level.nc"),
         )
         print("Surface-level variables downloaded!")
     else:
         print("Surface-level variables already downloaded!")
     
     # Download the atmospheric variables.
-    if not (download_path / "2024-11-01-atmospheric.nc").exists():
+    if not (download_path / "2024-11-08-atmospheric.nc").exists():
         c.retrieve(
             "reanalysis-era5-pressure-levels",
             {
@@ -163,14 +155,39 @@ def gather_data_for_aurora():
                 # "time": ["00:00", "06:00", "12:00", "18:00"],
                 "format": "netcdf",
             },
-            str(download_path / "2024-11-01-atmospheric.nc"),
+            str(download_path / "2024-11-08-atmospheric.nc"),
         )
         print("Atmospheric variables downloaded!")
     else:
         print("Atmospheric variables already downloaded!")
 
+def download_weather(input: int) -> None:
+    # Connect to the CDS API
+    c = cdsapi.Client()
+
+    if input == 1:
+        # Data will be downloaded here
+        download_path = Path(f"weather_data/aurora")
+        gather_data_for_aurora(download_path, c)
+    elif input == 2:
+        download_path = Path(f"weather_data/graphcast")
+        gather_data_for_graphcast(download_path, c)
+    else:
+        download_path = Path(f"weather_data/aurora")
+        gather_data_for_aurora(download_path, c)
+        download_path = Path(f"weather_data/graphcast")
+        gather_data_for_graphcast(download_path, c)
+
 if __name__ == "__main__":
+    # Data will be downloaded here
+    download_path = Path(f"../weather_data/{argv[1]}")
+
+    # Connect to the CDS API
+    c = cdsapi.Client()
+
     if argv[1] == "aurora":
         gather_data_for_aurora()
     elif argv[1] == "graphcast":
         gather_data_for_graphcast()
+    else:
+        print("Bad input")
