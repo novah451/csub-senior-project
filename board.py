@@ -9,25 +9,22 @@ import statistics as st
 from sys import argv
 
 '''PREREQUISITES: CONSTANTS'''
-WEATHER_FILE = "predictions/aurora/predictions_12-18.csv"
-AIR_POLLUTION_FILE = "kern_county_aqi.csv"
-SAVE = "board.json"
+WEATHER_FILE: str = "predictions/aurora/predictions_12-18.csv"
+AIR_POLLUTION_FILE: str = "kern_county_aqi.csv"
+SAVE: str = "board.json"
+SHIFT: float = 0.125
+PRESSURE_LEVELS: float = 13
 
-SHIFT = 0.125
-# SHIFT = 0.5
-PRESSURE_LEVELS = 13
-# PRESSURE_LEVELS = 37
-
-TIME_1 = datetime(2023, 1, 1, 12, 0, 0)
-TIME_2 = datetime(2023, 1, 1, 18, 0, 0)
+TIME_1: datetime = datetime(2024, 11, 1, 12, 0, 0)
+TIME_2: datetime = datetime(2024, 11, 1, 18, 0, 0)
 
 load_dotenv()
-API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
+API_KEY: str = os.getenv("OPENWEATHERMAP_API_KEY")
 
-df = pd.read_csv(WEATHER_FILE)
+df: pd.DataFrame = pd.read_csv(WEATHER_FILE)
+ap_df: pd.DataFrame = pd.read_csv(AIR_POLLUTION_FILE)
+
 df['time'] = pd.to_datetime(df['time'], format='ISO8601')
-
-ap_df = pd.read_csv(AIR_POLLUTION_FILE)
 
 # TODO: check if board.json exists -> if yes, set this var to it
 board = {"board": []}
@@ -38,7 +35,7 @@ LAT = df["lat"].unique()
 '''PREREQUISITES: FUNCTIONS'''
 def air_pollution_api(lat, lon):
     # Build out API Call URL
-    url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+    url: str = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
     # Call API
     response = get(url)
     # Parse the response

@@ -116,8 +116,8 @@ def gather_data_for_aurora():
             {
                 "product_type": "reanalysis",
                 "variable": static_fields,
-                "year": "2023",
-                "month": "01",
+                "year": "2024",
+                "month": "11",
                 "day": "01",
                 "time": "00:00",
                 "format": "netcdf",
@@ -129,39 +129,41 @@ def gather_data_for_aurora():
         print("Static variables already downloaded!")
     
     # Download the surface-level variables.
-    if not (download_path / "2023-01-01-surface-level.nc").exists():
+    if not (download_path / "2024-11-01-surface-level.nc").exists():
         c.retrieve(
             "reanalysis-era5-single-levels",
             {
                 "product_type": "reanalysis",
                 "variable": surface_level_fields,
-                "year": "2023",
-                "month": "01",
+                "year": "2024",
+                "month": "11",
                 "day": "01",
-                "time": ["00:00", "06:00", "12:00", "18:00"],
+                "time": ["00:00", "06:00"],
+                # "time": ["00:00", "06:00", "12:00", "18:00"],
                 "format": "netcdf",
             },
-            str(download_path / "2023-01-01-surface-level.nc"),
+            str(download_path / "2024-11-01-surface-level.nc"),
         )
         print("Surface-level variables downloaded!")
     else:
         print("Surface-level variables already downloaded!")
     
     # Download the atmospheric variables.
-    if not (download_path / "2023-01-01-atmospheric.nc").exists():
+    if not (download_path / "2024-11-01-atmospheric.nc").exists():
         c.retrieve(
             "reanalysis-era5-pressure-levels",
             {
                 "product_type": "reanalysis",
                 "variable": pressure_level_fields,
                 "pressure_level": pressure_levels,
-                "year": "2023",
-                "month": "01",
+                "year": "2024",
+                "month": "11",
                 "day": "01",
-                "time": ["00:00", "06:00", "12:00", "18:00"],
+                "time": ["00:00", "06:00"],
+                # "time": ["00:00", "06:00", "12:00", "18:00"],
                 "format": "netcdf",
             },
-            str(download_path / "2023-01-01-atmospheric.nc"),
+            str(download_path / "2024-11-01-atmospheric.nc"),
         )
         print("Atmospheric variables downloaded!")
     else:
