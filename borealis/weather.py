@@ -186,8 +186,8 @@ if __name__ == "__main__":
     c = cdsapi.Client()
 
     if argv[1] == "aurora":
-        gather_data_for_aurora()
+        gather_data_for_aurora(download_path, c)
     elif argv[1] == "graphcast":
-        gather_data_for_graphcast()
+        gather_data_for_graphcast(download_path, c)
     else:
         print("Bad input")

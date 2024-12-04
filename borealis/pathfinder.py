@@ -21,7 +21,7 @@ def pathfinder(board: dict, entry: list[float]) -> pd.DataFrame:
         "so2", 
         "pm2_5", 
         "pm10", 
-        "aqi"
+        # "aqi"
     ]
 
     path: pd.DataFrame = pd.DataFrame(columns=columns)
@@ -48,7 +48,7 @@ def build_path(board: dict, entry: list[float, float], path: pd.DataFrame) -> pd
             so2: np.float32 = board["board"][i]["so2"]
             pm2_5: np.float32 = board["board"][i]["pm2_5"]
             pm10: np.float32 = board["board"][i]["pm10"]
-            aqi: np.float32 = board["board"][i]["aqi"]
+            # aqi: np.float32 = board["board"][i]["aqi"]
             break
     
     angle = mpcalc.wind_direction(uwind * units('m/s'), vwind * units('m/s'), 'to')
@@ -107,7 +107,7 @@ def build_path(board: dict, entry: list[float, float], path: pd.DataFrame) -> pd
         so2,
         pm2_5,
         pm10,
-        aqi
+        # aqi
     ]
 
     # add the lon and lat from entry to the path DataFrame

@@ -1,6 +1,13 @@
 from borealis import setup_folders
 from borealis import PrettyCLI
 from borealis import download_weather
+from borealis import aqi
+from dotenv import load_dotenv
+
+import os
+
+load_dotenv()
+API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
 
 PrettyCLI.tprint("Hello! This is the setup script from Project Borealis \n")
 
@@ -31,3 +38,6 @@ download_weather(dataset)
 PrettyCLI.tprint("Requested weather input data successfully downloaded!")
 
 # 3. Download and save AQI data for kern county
+PrettyCLI.tprint("Now downloading required AQI information")
+aqi(API_KEY)
+PrettyCLI.tprint("AQI information successfully downloaded!")
