@@ -49,13 +49,11 @@ if CURRENT_TIME.hour != 12:
     df = df.sort_values(by=["time", "lat", "lon"], ascending=[True, True, True])
     df.to_csv(SAVE, na_rep='null', index=False)
 else:
-    day_old_file = CURRENT_TIME - timedelta(days=1)
-    OLD_FILE = f"predictions/aurora/local_predictions_{day_old_file.date()}.csv"
+    P_PREVIOUS_TIME = PREVIOUS_TIME - timedelta(hours=6)
+    OLD_FILE = f"log/components/local_predictions_{P_PREVIOUS_TIME.hour:02d}-{PREVIOUS_TIME.hour:02d}.csv"
 
     print("OLD FILE:", OLD_FILE)
     print("FOO TIME:", PREVIOUS_TIME)
-
-    exit(0)
 
     df_now = pd.read_csv(FILE)
     df_old = pd.read_csv(OLD_FILE)
@@ -71,3 +69,5 @@ else:
 
     df = df.sort_values(by=["time", "lat", "lon"], ascending=[True, True, True])
     df.to_csv(SAVE, na_rep='null', index=False)
+
+    print(df)
