@@ -1,58 +1,51 @@
 from datetime import datetime
-from dotenv import load_dotenv
-import json
-import numpy as np
-import os
-import pandas as pd
-from requests import get
-import statistics as st
+from datetime import timedelta
 from sys import argv
+import json
+import pandas as pd
 
-'''PREREQUISITES: CONSTANTS'''
-WEATHER_FILE: str = "predictions/aurora/predictions_12-18.csv"
-AIR_POLLUTION_FILE: str = "kern_county_aqi.csv"
-SAVE: str = "board.json"
-SHIFT: float = 0.125
-PRESSURE_LEVELS: float = 13
+def create_board(prev: datetime = None, curr: datetime = None) -> None:
+    '''PREREQUISITES: CONSTANTS'''
+    WEATHER_FILE: str = f"predictions/aurora/local_predictions_{prev.hour}-{curr.hour}.csv"
+    AIR_POLLUTION_FILE: str = "aqi.csv"
+    SAVE: str = f"board_{prev.hour}-{curr.hour}.json"
+    SHIFT: float = 0.125
+    PRESSURE_LEVELS: float = 13
 
-TIME_1: datetime = datetime(2024, 11, 1, 12, 0, 0)
-TIME_2: datetime = datetime(2024, 11, 1, 18, 0, 0)
+    if prev is None and curr is None:
+        prev: datetime = datetime(2024, 11, 1, 12, 0, 0)
+        curr: datetime = datetime(2024, 11, 1, 18, 0, 0)
 
-load_dotenv()
-API_KEY: str = os.getenv("OPENWEATHERMAP_API_KEY")
+    df: pd.DataFrame = pd.read_csv(WEATHER_FILE)
+    ap_df: pd.DataFrame = pd.read_csv(AIR_POLLUTION_FILE)
 
-df: pd.DataFrame = pd.read_csv(WEATHER_FILE)
-ap_df: pd.DataFrame = pd.read_csv(AIR_POLLUTION_FILE)
+    df['time'] = pd.to_datetime(df['time'], format='ISO8601')
 
-df['time'] = pd.to_datetime(df['time'], format='ISO8601')
+    # TODO: check if board.json exists -> if yes, set this var to it
+    board = {"board": []}
 
-# TODO: check if board.json exists -> if yes, set this var to it
-board = {"board": []}
+    LON = df["lon"].unique()
+    LAT = df["lat"].unique()
 
-LON = df["lon"].unique()
-LAT = df["lat"].unique()
+    board_setup(LAT, LON, board)
+    collect_weather_and_dump(df, prev, curr, PRESSURE_LEVELS, SHIFT, board)
+    collect_air_pollution_and_dump(ap_df, board)
 
-'''PREREQUISITES: FUNCTIONS'''
-def air_pollution_api(lat, lon):
-    # Build out API Call URL
-    url: str = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
-    # Call API
-    response = get(url)
-    # Parse the response
-    response_to_json = response.json()
-    return response_to_json
+    with open(SAVE, 'w', encoding='utf-8') as f:
+        json.dump(board, f, ensure_ascii=False, indent=4)
+
 
 '''PART I: Setup the board JSON object'''
-def board_setup():
+def board_setup(lat, lon, board):
     TMP = []
     GRD = []
     LAT_FLG = ""
 
-    for y in range(len(LAT)):
+    for y in range(len(lat)):
         if y > 0:
             LAT_FLG = "PAIR"
-        for x in range(len(LON)):
-            val = (float(LON[x]), float(LAT[y]))
+        for x in range(len(lon)):
+            val = (float(lon[x]), float(lat[y]))
             TMP.append(val)
 
             if x > 0 and LAT_FLG == "PAIR":
@@ -61,7 +54,7 @@ def board_setup():
                 GRD.append(query)
                 TMP.pop(0)
 
-            if x == len(LON) - 1 and LAT_FLG == "PAIR":
+            if x == len(lon) - 1 and LAT_FLG == "PAIR":
                 TMP.pop(0)
 
     for square in GRD:
@@ -73,7 +66,7 @@ def board_setup():
         board["board"].append(query)
 
 '''PART II: Collect Weather -> Save to JSON object'''
-def collect_weather_and_dump():
+def collect_weather_and_dump(df, prev, curr, pressure_levels, shift, board):
     # original_wv = ["10m_u_component_of_wind", "10m_v_component_of_wind", "specific_humidity", "total_precipitation_6hr"]
     original_wv = ["u_component_of_wind", "v_component_of_wind", "specific_humidity"]
 
@@ -83,19 +76,18 @@ def collect_weather_and_dump():
     col.extend(weather_variables)
     board_df = pd.DataFrame(columns=col)
 
-    df_cur = df[df["time"] != TIME_1].reset_index(drop=True)
-    df_old = df[df["time"] != TIME_2].reset_index(drop=True)
+    df_cur = df[df["time"] != prev].reset_index(drop=True)
+    df_old = df[df["time"] != curr].reset_index(drop=True)
 
     endpoint = df_cur["lon"].nunique() * df_cur["lat"].nunique()
     mul = 1
 
     # both dataframes are same length, won't matter which is chosen
     for _ in range(0,endpoint):
-        ind = PRESSURE_LEVELS * mul
-        # ind = PRESSURE_LEVELS * mul
+        ind = pressure_levels * mul
 
-        x = df_cur.iloc[ind-PRESSURE_LEVELS:ind]
-        y = df_old.iloc[ind-PRESSURE_LEVELS:ind]
+        x = df_cur.iloc[ind-pressure_levels:ind]
+        y = df_old.iloc[ind-pressure_levels:ind]
 
         query = {
             "lon": x["lon"].iloc[0],
@@ -125,7 +117,7 @@ def collect_weather_and_dump():
             x_coord = j["center"][0]
             y_coord = j["center"][1]
 
-            if (x_coord - SHIFT <= lon <= x_coord + SHIFT) and (y_coord - SHIFT <= lat <= y_coord + SHIFT):
+            if (x_coord - shift <= lon <= x_coord + shift) and (y_coord - shift <= lat <= y_coord + shift):
                 for ind, p in enumerate(weather_variables):
                     board["board"][index][p] = float(wv[ind])
 
@@ -134,50 +126,17 @@ def collect_weather_and_dump():
 #       is because a) it's easier to visual what each thing does and b) we have more freedom
 #       to perform other functions within this one (i.e., if a quadrant does not have any data,
 #       then create an API call for that quadrant's center point, get the data, and store it there.)
-def collect_air_pollution_and_dump():
-    air_pollution_variables = ["co", "no", "no2", "o3", "so2", "pm2_5", "pm10", "aqi"]
+def collect_air_pollution_and_dump(ap_df, board):
+    air_pollution_variables = ["co", "no", "no2", "o3", "so2", "pm2_5", "pm10"]
 
     # First Pass of Board -> Set the inital points in
     for index, row in ap_df.iterrows(): 
-        lat = row["latitude"]
-        lon = row["longitude"] + 360
-
-        for ind, sq in enumerate(board["board"]):
-            x_coord = sq["center"][0]
-            y_coord = sq["center"][1]
-
-            if "aqi" in board["board"][ind]:
-                # print(f"There's already data at {ind}, skipping")
-                for wv in air_pollution_variables:
-                    board["board"][ind][wv] = (board["board"][ind][wv] + row[wv]) / 2
-            else:
-                if (x_coord - SHIFT <= lon <= x_coord + SHIFT) and (y_coord - SHIFT <= lat <= y_coord + SHIFT):
-                    # print("yessir")
-                    for j, var in enumerate(air_pollution_variables):
-                        board["board"][ind][var] = row[var]
+        for ap_v in air_pollution_variables:
+            board["board"][index][ap_v] = row[ap_v]
     
-    # Second Pass of Board -> Set points in if there are none
-    for ind, sq in enumerate(board["board"]):
-        x_coord = sq["center"][0]
-        y_coord = sq["center"][1]
-
-        if "aqi" not in board["board"][ind]:
-            # print("not here")
-            data = air_pollution_api(y_coord, x_coord - 360)
-            aqi = data["list"][0]["main"]
-            pol = data["list"][0]["components"]
-            for wv in air_pollution_variables:
-                if wv == "aqi":
-                    board["board"][ind][wv] = aqi[wv]
-                else:
-                    board["board"][ind][wv] = pol[wv]
-
-
 '''PART IV: Activate all functions -> Save JSON object to JSON file'''
 if __name__ == "__main__":
-    board_setup()
-    collect_weather_and_dump()
-    collect_air_pollution_and_dump()
+    CURRENT_TIME = datetime(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]), 0, 0)
+    PREVIOUS_TIME = CURRENT_TIME - timedelta(hours=6)
 
-    with open(SAVE, 'w', encoding='utf-8') as f:
-        json.dump(board, f, ensure_ascii=False, indent=4)
+    create_board(PREVIOUS_TIME, CURRENT_TIME)

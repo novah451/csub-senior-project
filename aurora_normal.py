@@ -4,6 +4,9 @@ from aurora import Metadata
 from aurora import rollout
 from borealis import Clock
 from borealis import PrettyCLI
+from datetime import date
+from sys import argv
+
 import numpy as np
 import os
 from pathlib import Path
@@ -17,8 +20,10 @@ PrettyCLI.tprint(f"Program PID: {os.getpid()}")
 # Path towards the weather data SPECIFIC TO AURORA
 path = Path("weather_data/aurora")
 
+CURRENT_TIME = date(int(argv[1]), int(argv[2]), int(argv[3]))
+
 # Path towards where the predictions are saved
-SAVE = "predictions/aurora/predictions.csv"
+SAVE = f"predictions/aurora/global_predictions_{CURRENT_TIME}.csv"
 
 # How many predictions will be made
 STEPS = 4
@@ -29,9 +34,9 @@ ALV = [(12, 50), (11, 100), (10, 150), (9, 200), (8, 250), (7, 300),
 
 '''Preparing a Batch'''
 # Convert the downloaded data to an aurora.Batch -> required by model
-static_vars_ds = xr.open_dataset(path / "static.nc", engine='netcdf4')
-surf_vars_ds = xr.open_dataset(path / "2024-11-08-surface-level.nc", engine='netcdf4')
-atmos_vars_ds = xr.open_dataset(path / "2024-11-08-atmospheric.nc", engine='netcdf4')
+static_vars_ds = xr.open_dataset(path / f"{argv[1]}-{argv[2]}-{argv[3]}-static.nc", engine='netcdf4')
+surf_vars_ds = xr.open_dataset(path / f"{argv[1]}-{argv[2]}-{argv[3]}-surface-level.nc", engine='netcdf4')
+atmos_vars_ds = xr.open_dataset(path / f"{argv[1]}-{argv[2]}-{argv[3]}-atmospheric.nc", engine='netcdf4')
 
 # Select this time index in the downloaded data
 i = 1
@@ -120,8 +125,8 @@ columns = [
 ]
 
 # aurora_df = pd.DataFrame(columns=columns)
-LAT = np.arange(90, -90, -0.25, dtype='float32')
-LON = np.arange(0, 360, 0.25, dtype='float32')
+LAT = np.arange(37, 34, -0.25, dtype='float32')
+LON = np.arange(239.25, 243, 0.25, dtype='float32')
 entry = 0
 query_dict = {}
 
