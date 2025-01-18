@@ -10,9 +10,9 @@ def setup_log():
         log_path.mkdir(parents=True, exist_ok=True)
         makedirs(log_path / "aurora")
         makedirs(log_path / "graphcast")
+        makedirs(log_path / "components")
         PrettyCLI.tprint("Log Folder Successfully Created ...")
     else:
-        # print("[!]    Log Folder Detected! No Further Action Required ...")
         PrettyCLI.tprint("Log Folder Detected! No Further Action Required ...")
 
 def setup_model():
@@ -44,7 +44,6 @@ def setup_model():
         blob_4.download_to_filename(model_path / "graphcast/stats/stddev_by_level.nc")
         PrettyCLI.tprint("All Required GraphCast Files Downloaded ...")
     else:
-        # print("[!]    Model Folder Detected! No Further Action Required ...")
         PrettyCLI.tprint("Model Folder Detected! No Further Action Required ...")
 
 def setup_prediction():
@@ -56,7 +55,6 @@ def setup_prediction():
         makedirs(prediction_path / "graphcast")
         PrettyCLI.tprint("Prediction Folder Successfully Created ...")
     else:
-        # print("[!]    Prediction Folder Detected! No Further Action Required ...")
         PrettyCLI.tprint("Prediction Folder Detected! No Further Action Required ...")
 
 def setup_weather():
@@ -69,7 +67,6 @@ def setup_weather():
         makedirs(weather_path / "graphcast")
         PrettyCLI.tprint("Weather Folder Successfully Created ...")
     else:
-        # print("[!]    Weather Folder Detected! No Further Action Required ...")
         PrettyCLI.tprint("Weather Folder Detected! No Further Action Required ...")
 
 print("")

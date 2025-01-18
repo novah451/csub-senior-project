@@ -15,7 +15,9 @@ print(PREVIOUS_TIME, CURRENT_TIME)
 # File Path(s)
 pt_5minBefore = PREVIOUS_TIME - timedelta(minutes=5)
 FILE = f"predictions/aurora/local_predictions_{pt_5minBefore.date()}.csv"
-SAVE = f"predictions/aurora/local_predictions_{PREVIOUS_TIME.hour}-{CURRENT_TIME.hour}.csv"
+SAVE = f"log/components/local_predictions_{PREVIOUS_TIME.hour:02d}-{CURRENT_TIME.hour:02d}.csv"
+
+print(SAVE)
 
 print("Accessing:", FILE)
 print("Saving to:", SAVE)

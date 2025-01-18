@@ -6,9 +6,9 @@ import pandas as pd
 
 def create_board(prev: datetime = None, curr: datetime = None) -> None:
     '''PREREQUISITES: CONSTANTS'''
-    WEATHER_FILE: str = f"predictions/aurora/local_predictions_{prev.hour}-{curr.hour}.csv"
-    AIR_POLLUTION_FILE: str = "aqi.csv"
-    SAVE: str = f"board_{prev.hour}-{curr.hour}.json"
+    WEATHER_FILE: str = f"log/components/local_predictions_{prev.hour:02d}-{curr.hour:02d}.csv"
+    AIR_POLLUTION_FILE: str = "log/components/aqi.csv"
+    SAVE: str = f"log/components/board_{prev.hour:02d}-{curr.hour:02d}.json"
     SHIFT: float = 0.125
     PRESSURE_LEVELS: float = 13
 

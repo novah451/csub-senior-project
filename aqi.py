@@ -74,7 +74,7 @@ def aqi(api_key: str, prev: datetime = None, curr: datetime = None) -> None:
         query_dict[index] = query_data
 
     aqi_df = pd.DataFrame.from_dict(query_dict, orient="index", columns=columns)
-    aqi_df.to_csv("aqi.csv", sep=",", index=False)
+    aqi_df.to_csv("log/components/aqi.csv", sep=",", index=False)
 
 if __name__ == "__main__":
     load_dotenv()
