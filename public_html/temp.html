@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.123/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.123/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Borealis</title>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-earth-americas"></i>
+                <span class="typing-text">BOREALIS</span>
+            </div>
+            <nav>
+                <a href="index.html"><button><i class="fa-solid fa-house"></i> Home</button></a>
+                <a href="about.html"><button><i class="fa-solid fa-user-group"></i> About Team</button></a>
+                <a href="https://github.com/novah451/csub-senior-project"><button><i
+                            class="fa-solid fa-layer-group"></i> Source Code</button></a>
+                <button><i class="fa-solid fa-feather-pointed"></i> Documentation</button>
+                <button><i class="fa-solid fa-graduation-cap"></i> Senior Expo Poster</button>
+            </nav>
+        </header>
+        <div class="content">
+            <div class="box control-panel">
+                <h2><i class="fa-solid fa-list"></i> Dashboard Menu</h2>
+                <div class="control-buttons">
+                    <button id="clear-grid">Air Pollution Grid With Origin</button>
+                    <button id="wind-direction"> UV Wind Direction Particles</button>
+                    <div class="section">
+                        <h2> View Pollutants Layers</h2>
+                        <div class="button-group">
+                            <button data-type="aqi">All Pollutants</button>
+                            <button data-type="PM2_5">P.M 2.5</button>
+                            <button data-type="CO">Carbon CO</button>
+                            <button data-type="PM10">P.M 10</button>
+                            <button data-type="SO2">Sulfur SO2</button>
+                            <button data-type="O3">Ozone O3</button>
+                            <button data-type="NO">Nitric NO</button>
+                            <button data-type="NO2">Nitrogen NO2</button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            <!-- <div id="wind" class="box wind-speed ">
+                <h2>Kern County Wind Speed Changes Tracking Every 6 Hours Chart</h2>
+                <div class="graph-container">
+                    <svg id="svgId" width="800" height="400"></svg>
+                    <script src="wind_speed_chart.js" type="module" defer></script>
+                </div>
+            </div>
+            <div id="poll" class="box pollution-chart ">
+                <h2>Kern County Pollution Tracking For Each Components Chart</h2>
+                <div class="toggle-container">
+                    <label>SWITCH LINE CHART</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="chart-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <label>SWITCH BAR CHART</label>
+                </div>
+                <div class="graph-container">
+                    <svg id="pollution-chart-svg" width="800" height="500"></svg>
+                </div>
+                <script src="wpollution_chart.js" type="module" defer></script>
+            </div> -->
+            <div id="box" class="box pollution">
+                <h2> Kern County Pollution Tracking Path</h2>
+		<div id="cesiumContainerPollution2" style="width: 100%; height: 400px; position: relative;"> 
+		    <div id="legend">
+                    <h3>Legend</h3>
+                        <ul>
+                        <li><span style="background-color: rgb(0, 255, 0); width: 20px; height: 20px; display: inline-block; border: 1px solid black;"></span> Good ()</li>
+                        <li><span style="background-color: rgb(255, 255, 0); width: 20px; height: 20px; display: inline-block; border: 1px solid black;"></span> Moderate ()</li>
+                        <li><span style="background-color: rgb(255, 126, 0); width: 20px; height: 20px; display: inline-block; border: 1px solid black;"></span> Unhealthy ()</li>
+                        <li><span style="background-color: rgb(128, 0, 128); width: 20px; height: 20px; display: inline-block; border: 1px solid black;"></span> Very Unhealthy ()</li>
+                        </ul>
+                   </div>
+		</div>
+                <script src="./javascript/temp2.js" type="module" defer></script>
+            </div>
+            <!-- <div id="earth" class="box earth-at-night ">
+                <h2>Dynamic Earth Layer</h2>
+                <div id="cesiumContainerEarthAtNight" style="width: 100%; height: 400px;"></div>
+                <script src="main.js" type="module" defer></script>
+            </div> -->
+	    
+        </div>
+    </div>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: url('img/pic.jpg') no-repeat center center/cover;
+            background-size: cover;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1620px;
+            height: 95vh;
+            margin: 0 auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.423);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.747);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.889);
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: bold;
+            color: white;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            align-items: center;
+            position: relative;
+            justify-content: center;
+            animation: text-glow 1.5s ease-in-out infinite alternate;
+            background: linear-gradient(45deg, #c0ecff, #5befff, #29d2d2, #17f0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+            border-radius: 5px;
+            padding: 5px;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+            }
+
+            100% {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6), 0 0 60px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        .logo i {
+            font-size: 3rem;
+            margin-right: 15px;
+            color: #d2f4ff;
+            animation: spin-icon 4s linear infinite;
+        }
+
+        @keyframes spin-icon {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        nav button {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s ease-in-out, box-shadow 0.3s;
+        }
+
+        nav button:hover {
+            background-color: #4effff;
+            transform: scale(1.05);
+            box-shadow: 0 2px 15px rgba(0, 188, 212, 0.6);
+        }
+
+        #calendar {
+            border-radius: 10px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .flatpickr-calendar {
+            background: rgba(40, 40, 40, 0.95) !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+            border-radius: 15px !important;
+            border: none !important;
+            width: 100% !important;
+            max-width: 300px !important;
+            position: relative !important;
+            margin: 0 auto !important;
+        }
+
+        .flatpickr-day {
+            color: white !important;
+            border-radius: 5px !important;
+        }
+
+        .flatpickr-day.selected {
+            background: #29d2d2 !important;
+            border-color: #29d2d2 !important;
+        }
+
+        .flatpickr-day:hover {
+            background: rgba(41, 210, 210, 0.504) !important;
+        }
+
+        .flatpickr-months .flatpickr-month {
+            color: white !important;
+        }
+
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            color: white !important;
+        }
+
+        .flatpickr-weekday {
+            color: #29d2d2 !important;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .wind-speed {
+            grid-column: 2 / 4;
+            grid-row: 2;
+            height: 300px;
+        }
+
+        .pollution-chart {
+            grid-column: 2 / 4;
+            grid-row: 3;
+            height: 400px;
+        }
+
+
+        .pollution,
+        .earth-at-night {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .box {
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.707);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #ababab, #c2c2c2, #ffffff);
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: brightText 3s ease-in-out infinite;
+        }
+
+        @keyframes brightText {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        .control-panel {
+            grid-row: span 3;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-buttons button {
+            background-color: #2b2b2b;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-buttons button:hover {
+            background-color: #29d2d2;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(41, 210, 210, 0.6);
+        }
+
+        .control-buttons button:active {
+            transform: translateY(0);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .button-group button {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .button-group button:hover {
+            background-color: #29d2d2;
+            transform: scale(1.05);
+        }
+
+        .button-group button:active {
+            transform: scale(0.98);
+        }
+
+        .graph-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            z-index: 0;
+        }
+
+        #cesiumContainerPollution2,
+        #cesiumContainerEarthAtNight {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.75);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.627);
+        }
+
+        .line {
+            fill: none;
+            stroke-width: 3;
+            transition: stroke-opacity 0.2s ease, stroke-width 0.2s ease;
+        }
+
+        .line:hover {
+            stroke-width: 4;
+            opacity: 0.9;
+        }
+
+        .area {
+            opacity: 0.25;
+            transition: opacity 0.3s ease;
+        }
+
+        .area:hover {
+            opacity: 0.5;
+        }
+
+        circle {
+            transition: r 0.3s ease, stroke-width 0.3s ease;
+        }
+
+        circle:hover {
+            r: 6;
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+
+        .axis text {
+            font-size: 14px;
+            fill: #ffffff;
+            font-weight: 400;
+        }
+
+        .axis path,
+        .axis line {
+            stroke: #ccc;
+        }
+
+        .legend rect {
+            border-radius: 5px;
+        }
+
+        .legend text {
+            font-size: 14px;
+            fill: #ffffff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .legend {
+            font-size: 14px;
+            margin-left: 20px;
+        }
+
+        .flatpickr-calendar {
+            display: block;
+            position: absolute;
+            z-index: 10;
+            margin-top: 20px;
+        }
+
+        .toggle-container {
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ffffff;
+            border-radius: 24px;
+            transition: 0.4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: rgb(0, 0, 0);
+            border-radius: 50%;
+            transition: 0.4s;
+        }
+
+        input:checked+.slider {
+            background-color: #cdfffd;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .off {
+            display: none;
+        }
+	#legend {
+    	    position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            background-color: rgba(255, 255, 255, 0.3); 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            z-index: 1000; 
+        }
+        #legend h3 {
+            margin: 0 0 5px 0; 
+            font-size: 14px; 
+        }
+
+        #legend ul {
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+
+        #legend li {
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 5px; 
+        }
+
+        #legend span {
+            margin-right: 5px; 
+        }
+    </style>
+</body>
+
+</html>

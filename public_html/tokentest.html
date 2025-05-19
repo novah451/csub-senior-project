@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cesium Token Test</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.123/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.123/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMWUyYmE1OC04NTJhLTQzN2EtYmI5MC00NWFmZTUyM2U5OGEiLCJpZCI6MjkwMDI3LCJpYXQiOjE3NDM1MjI5NzB9.TAsGwkBX5Q43TnFuksCNLyOdslWfwrV7QlHbR-4jpFg';
+    const viewer = new Cesium.Viewer('cesiumContainer');
+  </script>
+</body>
+</html>

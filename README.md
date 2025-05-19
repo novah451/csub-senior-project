@@ -40,4 +40,4 @@ The following instructions are written with the idea that the user has prior kno
 
 ## Disclaimer:
 
-   All outputs created by this program are intended to be seen via the command line. If something akin to the web interface provided by the team is needed, then it is **UP TO THE USER** to create their own web server and develop the frontend for it. 
+   All outputs created by this program are intended to be seen via the command line. If something akin to the web interface provided by the team is needed, then it is **UP TO THE USER** to create their own web server and develop the frontend for it. The code for our frontend can be seen under the `public_html` folder, which can be used as either an inspiration or as something to act as a placeholder for a web interface. 

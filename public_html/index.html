@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Borealis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.123/Build/Cesium/Cesium.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.123/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-earth-americas"></i>
+                <span class="typing-text">BOREALIS</span>
+            </div>
+            <nav>
+                <button><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></button>
+                <button><a href="about.html"><i class="fa-solid fa-user-group"></i> About Team</a></button>
+                <button><a href="https://github.com/novah451/csub-senior-project"><i
+                            class="fa-solid fa-layer-group"></i> Source Code</a></button>
+                <button><i class="fa-solid fa-feather-pointed"></i> Documentation</button>
+                <button><a href="img/poster.pdf" target="_blank"><i class="fa-solid fa-graduation-cap"></i> Senior Expo Poster</a></button>
+            </nav>
+        </header>
+
+        <div class="content">
+            <!-- Dashboard Control Panel -->
+            <div class="box control-panel">
+                <h2><i class="fa-solid fa-list"></i> Dashboard Menu</h2>
+                <div class="control-buttons">
+                    <button id="clear-grid">Reset Grid</button>
+                    <button id="origin-path">Display Predicated Origin</button>
+                    <button id="wind-direction">Display Wind Direction</button>
+
+                    <!-- Pollutants Section -->
+                    <div class="section">
+                        <h2>View Each Pollutants Layers</h2>
+                        <div class="button-group">
+                            <button>AQI</button>
+                            <button class="pollutant-btn active" data-pollutant="PM2_5">P.M 2.5</button>
+                            <button class="pollutant-btn" data-pollutant="CO">Carbon CO</button>
+                            <button class="pollutant-btn" data-pollutant="O3">Ozone O3</button>
+                            <button class="pollutant-btn" data-pollutant="SO2">Sulfur SO2</button>
+                            <button class="pollutant-btn" data-pollutant="NO">Nitric NO</button>
+                            <button class="pollutant-btn" data-pollutant="NO2">Nitrogen NO2</button>
+                            <button class="pollutant-btn" data-pollutant="PM10">P.M 10</button>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>6 Hours Interval Time Series</h2>
+                        <div class="button-group">
+                            <button class="time-btn active" data-time="00:00">00:00</button>
+                            <button class="time-btn" data-time="06:00">06:00</button>
+                            <button class="time-btn" data-time="12:00">12:00</button>
+                            <button class="time-btn" data-time="18:00">18:00</button>
+                        </div>
+                    </div>
+
+                    <!-- Date Picker Section -->
+                    <div class="section">
+                        <h2>Select Prediction Date</h2>
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+	    
+            <div id="wind" class="box wind-speed">
+                <h2>Kern County Wind and Pollution Comparison 6-Hour Interval Tracking Chart</h2>
+                <div class="graph-container">
+                    <svg id="svgId"></svg>
+                </div>
+            </div>
+	    
+
+            <div id="grid" class="box pollution">
+                <h2 id="gridTitle"> Kern County Pollution Path: </h2>
+                <div id="cesiumContainerPollution">
+
+		</div>
+		</div>
+            </div>
+        </div>
+    </div>
+    <script src="./javascript/pw_chart2.js" type="module"></script>
+    <script src="./javascript/pollution_dashboard.js" type="module"></script>
+    <script src="./javascript/main.js" type="module"></script>
+</body>
+
+</html>
+
+<style>
+    :root {
+        --primary-color: #ffffff;
+        --primary-glow: rgba(255, 255, 255, 0.784);
+        --secondary-color: #0062ff;
+        --secondary-glow: rgba(112, 0, 255, 0.5);
+        --accent-color: #ff00c8;
+        --accent-glow: rgba(255, 0, 200, 0.5);
+        --dark-bg: #0a0a1a;
+        --panel-bg: rgba(16, 18, 35, 0.85);
+        --glass-effect: rgba(30, 36, 58, 0.6);
+        --button-bg: #1a1a3a;
+        --button-hover: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        --border-glow: 0 0 10px var(--primary-glow);
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+        background: url('img/pic.jpg') no-repeat center center/cover;
+        color: white;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    /* ===== CONTAINER STYLES ===== */
+    .container {
+        width: 100%;
+        max-width: 1620px;
+        height: 95vh;
+        margin: 0 auto;
+        padding: 15px;
+        background: rgba(10, 12, 25, 0.251);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.276), inset 0 0 40px rgba(0, 0, 0, 0.139);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 242, 255, 0.1);
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    .container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        animation: scanline 4s linear infinite;
+    }
+
+
+    /* ===== HEADER & NAVIGATION ===== */
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.889);
+    }
+
+
+    .logo {
+        font-size: 3rem;
+        font-weight: bold;
+        font-family: 'Cinzel', serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        color: rgb(255, 255, 255);
+        border-radius: 5px;
+        padding: 5px 20px;
+        overflow: hidden;
+    }
+
+
+    .logo::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: -50%;
+        width: 200%;
+        height: 10px;
+        background: radial-gradient(ellipse at center, rgba(73, 73, 73, 0.4) 0%, transparent 70%);
+        animation: shadow-sweep 2.5s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+        transform: rotate(-2deg);
+    }
+
+    @keyframes shadow-sweep {
+        0% {
+            left: -50%;
+        }
+
+        100% {
+            left: 100%;
+        }
+    }
+
+    .logo i {
+        font-size: 3rem;
+        margin-right: 15px;
+        color: white;
+        animation: spin-icon 4s linear infinite;
+    }
+
+    .typing-text {
+        font-family: 'Orbitron', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    nav {
+        display: flex;
+        gap: 8px;
+    }
+
+    nav button {
+        background: var(--button-bg);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Rajdhani', sans-serif;
+        letter-spacing: 1px;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1;
+    }
+
+    nav button a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    nav button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.5s;
+        z-index: -1;
+    }
+
+    nav button:hover {
+        background: var(--button-hover);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 242, 255, 0.4);
+        color: white;
+    }
+
+    nav button:hover::before {
+        left: 100%;
+    }
+
+    nav button i {
+        font-size: 1rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    /* ===== CONTENT GRID LAYOUT ===== */
+    .content {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    /* ===== BOX COMPONENTS ===== */
+    .box {
+        position: relative;
+        background: var(--panel-bg);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s ease;
+        border: 1px solid rgba(81, 81, 81, 0.35);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+
+    .box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at top right,
+                rgba(0, 0, 0, 0.136) 0%,
+                transparent 60%);
+        pointer-events: none;
+    }
+
+    .box::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(transparent,
+                transparent,
+                transparent,
+                var(--primary-color));
+        opacity: 0;
+        transition: opacity 0.4s;
+        animation: rotate 8s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--primary-glow);
+    }
+
+    .box:hover::after {
+        opacity: 0.1;
+    }
+
+
+    h2 {
+        color: #ffffff;
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    /* ===== CONTROL PANEL ===== */
+    .control-panel {
+        grid-row: span 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .control-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .control-buttons button {
+        background: var(--button-bg);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .control-buttons button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.5s;
+        z-index: -1;
+    }
+
+    .control-buttons button:hover {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px var(--primary-glow);
+    }
+
+    .control-buttons button:hover::before {
+        left: 100%;
+    }
+
+    .control-buttons button:active {
+        transform: translateY(0);
+    }
+
+    .section {
+        margin: 5px 0;
+        width: 100%;
+    }
+
+    .section h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+
+    .button-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        width: 100%;
+    }
+
+    .button-group button {
+        background: rgba(26, 26, 58, 0.7);
+        color: white;
+        padding: 10px 8px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 242, 255, 0.1);
+    }
+
+    .button-group button:hover {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        transform: scale(1.03);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 10px var(--primary-glow);
+        border-color: var(--primary-color);
+    }
+
+    .button-group button:active {
+        transform: scale(0.98);
+    }
+
+    /* ===== CALENDAR ===== */
+    #calendar {
+        border-radius: 10px;
+        max-width: 100%;
+        margin: 15px auto;
+    }
+
+    .flatpickr-calendar {
+        background: var(--panel-bg) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+        border-radius: 15px !important;
+        border: 1px solid rgba(46, 39, 95, 0.853) !important;
+        width: 100% !important;
+        max-width: 300px !important;
+        position: relative !important;
+        margin: 0 auto !important;
+    }
+
+    .flatpickr-day {
+        color: rgb(142, 141, 141) !important;
+        border-radius: 5px !important;
+    }
+
+    .flatpickr-day.selected {
+        background: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 10px var(--primary-glow) !important;
+    }
+
+    .flatpickr-day:hover {
+        background: rgba(80, 80, 80, 0.3) !important;
+    }
+
+    .flatpickr-months .flatpickr-month {
+        color: white !important;
+    }
+
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        color: white !important;
+    }
+
+    .flatpickr-weekday {
+        color: var(--primary-color) !important;
+    }
+
+    /* ===== VISUALIZATION CONTAINERS ===== */
+    .pollution,
+    .earth-at-night {
+        grid-column: 2 / 4;
+        height: 700px;
+        background: rgba(0, 0, 0, 0.75);
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    #cesiumContainerPollution,
+    #cesiumContainerEarthAtNight {
+        width: 100%;
+        height: 600px;
+        position: relative;
+        z-index: 10;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .wind-speed {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        height: 500px;
+    }
+
+    #svgId {
+        background-color: #0000008f;
+        width: 100%;
+        height: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: block;
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .off {
+        display: none;
+    }
+
+    /* ===== TOOLTIP & LEGEND ===== */
+    .tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.9);
+        color: #e0e0e0;
+        padding: 10px;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 100;
+    }
+
+    .legend {
+        fill: #e0e0e0;
+        font-size: 14px;
+    }
+
+    .legend-title {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .button {
+        background-color: #000000;
+        color: #e0e0e0;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 20px;
+        width: 100px;
+    }
+
+    .button:hover {
+        background-color: #ffffff;
+    }
+
+    .button.active {
+        background-color: #ffffff !important;
+        color: #0f1a2a;
+        font-weight: bold;
+        box-shadow: 0 0 10px #ffffff;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes glow {
+        0% {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        100% {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6), 0 0 60px rgba(255, 255, 255, 0.4);
+        }
+    }
+
+    @keyframes spin-icon {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes brightText {
+        0% {
+            background-position: 100% 0;
+        }
+
+        100% {
+            background-position: -100% 0;
+        }
+    }
+
+    /* ===== MEDIA QUERIES ===== */
+    @media (max-width: 1200px) {
+        .content {
+            grid-template-columns: 1fr 2fr;
+        }
+
+        .wind-speed {
+            grid-column: 1 / 3;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .content {
+            grid-template-columns: 1fr;
+        }
+
+        .wind-speed {
+            grid-column: 1;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav button {
+            margin: 5px;
+        }
+
+        .logo {
+            font-size: 3rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+        }
+
+        header {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>
+</head>
