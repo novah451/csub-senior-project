@@ -1,58 +1,40 @@
-# Project Borealis: Tracing the Origin of Air Pollution
+# [Borealis](https://athena.cs.csub.edu/~lrojo1/): Tracking Pollution in Kern County using Weather Patterns
 
-This package contains code to use DeepMind's [GraphCast](https://www.science.org/doi/10.1126/science.adi2336) and Microsoft's [Aurora](https://arxiv.org/pdf/2405.13063), as well as code to obtain the required ERA5 weather data.
-
-We have provided code that use the following pretrained models:
-
-| GraphCast        | Aurora        
-| :-------------: |:-------------:
-| `graphcast_small`      | `aurora-0.25-pretrained` 
+This package contains code that uses Microsoft's [Aurora](https://arxiv.org/pdf/2405.13063), as well as code to obtain the required ERA5 weather data.
 
 ## Prerequisites
 
 * Register an account with the [Climate Data Store](https://cds.climate.copernicus.eu/how-to-api) and follow their steps for setting up your API Key according to your operating system.
-* Register an account with [OpenWeather](https://openweathermap.org/api) (Their free tier should be sufficient), and save your API key in a `.env` file with the name `OPENWEATHERMAP_API_KEY`
-* NOTICE: `weather.py` and both models only use data from a predefined date and output a forecast for a predetermined time as well. The team plans on changing this in the future, but if you currently already have the computer skills to do so, you may change it **AT YOUR OWN RISK**
+* Register an account with [OpenWeather](https://openweathermap.org/api) (Their free tier should be sufficient), and write down your API key (will be used later).
+* **NOTICE**: This program does require the use of bash scripts in order to expedite certain processes. If you are unsure of what these scripts do or are unsure if they are trustworthy, you may look through any file with the `.sh` file extenstion. Nonetheless, <ins>*IT IS UP TO YOU*</ins> to decide whether or not to trust the provided scripts.
 
+## One More Thing ...
+The following instructions are written with the idea that the user has prior knowledge with how to work with Python and the command line of your operating system. If you do not or need a refresher, we **HIGHLY** recommend doing so before continuing. Futhermore, <ins>this program has only been tested under a Linux/GNU enviroment</ins>, and while it will work on MAC OS X devices, we are uncertain of its ability to run on Windows-based machines. If you only have a Windows machine, we recommend downloading the Windows Subsystem for Linux ([WSL](https://learn.microsoft.com/en-us/windows/wsl/install)) and continuing afterwards. Finally, while not intended, this program MIGHT work if the hour or interval is not a multiple of six (think 00:00, 06:00, 12:00, and 18:00), but some problems that we may have overlooked might come up. Therefore, for the best experience, run this program sometime between the previously-stated 6-hour time intervals and continously do so after each hour until there is enough data for the program to create an evaluation. 
+  
 ## Steps-to-Follow
+
 1. Download the repository
 
    You can download the repository as either a zip file or by cloning using Git.
 
-2. Create a Python Virtual Enviroment and Download Required Packages
+2. Run `source setup.sh`
    
-   In the main directory, run `python3 -m venv .venv` to create the folder and use `source .venv/bin/activate` to enter the virtual environment. To download all the necessary packages, use the command `pip install -r requirements.txt`.
+   After downloading the repository and entering the main directory, run this command to setup the necessary conda enviroment with Python, download all required pip packages as seen in the `requirements.txt` file, activate the conda enviroment, and create every folder needed by the program.
 
-   * Note from Developers: Some packages required to run the Aurora model **MAY NOT** be included in the requirements.txt document. If you would like to run this model, run the command `pip install microsoft-aurora`, which should download the few remaining packages needed (mainly Nvidia-based dependencies).
+   * Note from Developers: Some packages required to run the Aurora model **MAY NOT** be included in the requirements.txt document. If any errors occur after attempting to run the mdoel, run the command `pip install microsoft-aurora`, which should download the few remaining packages needed (mainly Nvidia-based dependencies).
   
-3. Run the setup file: `python3 setup.py`
+3. Run `bash current.sh` or `bash forecast.sh`
 
-   Running this file generates the folder structure required for the program. It also downloads any files required by either model to work locally.
+   These two commands complete vastly different things:
+   * current.sh: Will either download the current weather data from the OpenWeather API, or do the same but also compile the last 6-hours' worth of weather data into one file and download the last 6-hours' worth of air pollution data, also from the OpenWeather API, and create an evaluation for that interval. For the latter half to occur, THERE NEEDS TO BE 6-HOURS' WORTH OF DATA.
+   * forecast.sh: Will download whatever weather data and air pollution data the OpenWeather API has forecasted for the next 24-hours, splitting said data into 4 sections, each seperated by 6-hour time intervals, and creating and evaluation from this data. **NOTE**: If the intent of the user is to see how the program generally works, this function should work best. 
 
-4. Download Weather Data: `python3 weather.py [MODEL]`
+4. Run `source done.sh`
    
-   `weather.py` is your ticket to downloading the necessary ERA5 data. However, it is currently set up to download the data in different ways depending on which model you want to use. If you plan on using Aurora, use the command `python3 weather.py aurora`. If you plan on using GraphCast, the command is `python3 weather.py graphcast`. The data itself will be downloaded in the `weather_data` folder.
+   Once any operation of the program is complete, the user can exit any conda enviroments by using this commands.
 
-5. Generate the predicted weather forecast
-
-   Run `python3 aurora_normal.py` to use the **Aurora** model or `python3 graphcast_small.py` for **GraphCast**. For now, `aurora_normal.py` generates a predicted forcast for 2023-01-01 across 12 hours split into two six-hour sections [12:00, 18:00], while `graphcast_small.py` generates a forecast for 2024-01-02 across 18 hours seperated into 4 sections [00:00, 06:00, 12:00, 18:00].
-
-6. Filter the Aurora predictions to show Kern County, California only
-
-   Run `python3 filter.py` to access the aurora predictions directory and filter the data using Kern County latitude (34-36) and longitude (239-242). This will make a new csv file called `predictions_12-18.csv` and store it within the `predictions/aurora` folder. 
-   
-   **NOTE**: As stated, **THIS ONLY FILTERS THE DATA OBTAINED FROM AURORA**. The development team plans on adding functionality so that both work, but if you would like to use graphcast, the changes should be simple enough.
-
-7. Collect Kern County Air Pollution Data: `python3 kern_aqi.py`
-
-   In this repository, there should be a file called `kern_county_aqi.csv.sample`. For this program to work, copy this file and remove the `.sample` from it. Then, run `kern_aqi.py` to obtain the data specific to each city listed in the CSV file.
-
-   **NOTE**: The development is considering giving the user the ability to choose whatever longitude and latitude range they desire, buidling a CSV according to their choice. As of right now, the plan is to keep it localized to Kern County. However, this may be subject to change
-
-8. Build the board: `python3 board.py`
-
-   Running this file creates the necessary JSON file, `board.json` used by the algorithm (TBA) to determine where the origin of air pollution can be found. 
+   * NOTE: If the user wants to re-enter the conda enviroment set up by the program at the start, then running the command `source setup.sh` will re-enter the user into the enviroment, thereby allowing the use of the program once again. 
 
 ## Disclaimer:
 
-   This project is still in the very early stages of devlopment. We plan on adding more/doing more with what we have provided. There is still A LOT we do not know. As development continues, we plan on updating this respository with any new features that we add/come up with.
+   All outputs created by this program are intended to be seen via the command line. If something akin to the web interface provided by the team is needed, then it is **UP TO THE USER** to create their own web server and develop the frontend for it. 
