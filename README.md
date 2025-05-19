@@ -22,14 +22,17 @@ The following instructions are written with the idea that the user has prior kno
    After downloading the repository and entering the main directory, run this command to setup the necessary conda enviroment with Python, download all required pip packages as seen in the `requirements.txt` file, activate the conda enviroment, and create every folder needed by the program.
 
    * Note from Developers: Some packages required to run the Aurora model **MAY NOT** be included in the requirements.txt document. If any errors occur after attempting to run the mdoel, run the command `pip install microsoft-aurora`, which should download the few remaining packages needed (mainly Nvidia-based dependencies).
+
+3. Add your OpenWeather API key to the `.env` file.
+   * Open the .env file with your text editor of choice and add your API key. (Example: OPENWEATHERMAP_API_KEY="my_api_key")
   
-3. Run `bash current.sh` or `bash forecast.sh`
+4. Run `bash current.sh` or `bash forecast.sh`
 
    These two commands complete vastly different things:
    * current.sh: Will either download the current weather data from the OpenWeather API, or do the same but also compile the last 6-hours' worth of weather data into one file and download the last 6-hours' worth of air pollution data, also from the OpenWeather API, and create an evaluation for that interval. For the latter half to occur, THERE NEEDS TO BE 6-HOURS' WORTH OF DATA.
    * forecast.sh: Will download whatever weather data and air pollution data the OpenWeather API has forecasted for the next 24-hours, splitting said data into 4 sections, each seperated by 6-hour time intervals, and creating and evaluation from this data. **NOTE**: If the intent of the user is to see how the program generally works, this function should work best. 
 
-4. Run `source done.sh`
+5. Run `source done.sh`
    
    Once any operation of the program is complete, the user can exit any conda enviroments by using this commands.
 
