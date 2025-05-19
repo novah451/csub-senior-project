@@ -40,8 +40,14 @@ def gather_data_for_aurora(download_path: Path, c: cdsapi.Client):
                 "year": argv[1],
                 "month": argv[2],
                 "day": argv[3],
-                "time": "00:00",
-                "area": [37, 239.25, 34, 243],
+                # 6-hour intervals
+                "time": "00:00", # No area: Lat = 721, Lon = 1440
+                # 1-hour intervals
+                # "time": "11:00", # No area: Lat = 721, Lon = 1440
+                # "area": [37, 239.25, 34, 243], # Lat = 13, Lon = 16
+                # "area": [47, 239.25, 34, 253], # Lat = 53, Lon = 56
+                # "area": [59, 239.25, 34, 265], # Lat = 101, Lon = 104
+                # "area": [75, 200, -50, 325.75], # Lat = 501, Lon = 504
                 "format": "netcdf",
             },
             str(download_path / f"{argv[1]}-{argv[2]}-{argv[3]}-static.nc"),
@@ -60,8 +66,17 @@ def gather_data_for_aurora(download_path: Path, c: cdsapi.Client):
                 "year": argv[1],
                 "month": argv[2],
                 "day": argv[3],
+                # 6-hour intervals
                 "time": ["00:00", "06:00"],
-                "area": [37, 239.25, 34, 243],
+
+                # 1-hour intervals
+                # "time": ["00:00", "06:00", "07:00", "08:00"],
+                # "time": ["11:00", "12:00", "13:00", "14:00"],
+                # "time": ["00:00", "06:00", "12:00", "18:00"], # No area: Lat = 721, Lon = 1440
+                # "area": [37, 239.25, 34, 243], # Lat = 13, Lon = 16
+                # "area": [47, 239.25, 34, 253], # Lat = 53, Lon = 56
+                # "area": [59, 239.25, 34, 265], # Lat = 101, Lon = 104
+                # "area": [75, 200, -50, 325.75], # Lat = 501, Lon = 504
                 "format": "netcdf",
             },
             str(download_path / f"{argv[1]}-{argv[2]}-{argv[3]}-surface-level.nc"),
@@ -81,8 +96,16 @@ def gather_data_for_aurora(download_path: Path, c: cdsapi.Client):
                 "year": argv[1],
                 "month": argv[2],
                 "day": argv[3],
-                "time": ["00:00", "06:00"],
-                "area": [37, 239.25, 34, 243],
+                # 6-hour intervals
+                # "time": ["00:00", "06:00"],
+                "time": ["00:00", "06:00", "12:00", "18:00"], # No area: Lat = 721, Lon = 1440
+                # 1-hour intervals
+                # "time": ["00:00", "06:00", "07:00", "08:00"],
+                # "time": ["11:00", "12:00", "13:00", "14:00"],
+                # "area": [37, 239.25, 34, 243], # Lat = 13, Lon = 16
+                # "area": [47, 239.25, 34, 253], # Lat = 53, Lon = 56
+                # "area": [59, 239.25, 34, 265], # Lat = 101, Lon = 104
+                # "area": [75, 200, -50, 325.75], # Lat = 501, Lon = 504
                 "format": "netcdf",
             },
             str(download_path / f"{argv[1]}-{argv[2]}-{argv[3]}-atmospheric.nc"),

@@ -11,6 +11,12 @@ def setup_log():
         makedirs(log_path / "aurora")
         makedirs(log_path / "graphcast")
         makedirs(log_path / "components")
+        makedirs(log_path / "components/current")
+        makedirs(log_path / "components/forecast")
+        makedirs(log_path / "components/archive")
+        makedirs(log_path / "components/archive/current")
+        makedirs(log_path / "components/archive/forecast")
+        makedirs(log_path / "schedule")
         PrettyCLI.tprint("Log Folder Successfully Created ...")
     else:
         PrettyCLI.tprint("Log Folder Detected! No Further Action Required ...")
@@ -69,6 +75,15 @@ def setup_weather():
     else:
         PrettyCLI.tprint("Weather Folder Detected! No Further Action Required ...")
 
+def setup_batch():
+    batch_path = Path("batch/")
+    if not batch_path.exists():
+        PrettyCLI.tprint("No Weather Folder Detected. Generating ...")
+        batch_path.mkdir(parents=True, exist_ok=True)
+        PrettyCLI.tprint("Batch Folder Successfully Created ...")
+    else:
+        PrettyCLI.tprint("Batch Folder Detected! No Further Action Required ...")
+
 print("")
 PrettyCLI.tprint("Setting up the folder structure...")
 
@@ -81,8 +96,11 @@ setup_model()
 # 3. Setup the folder structure for the predictions
 setup_prediction()
 
-#4. Setup the folder structure for the weather data
+# 4. Setup the folder structure for the weather data
 setup_weather()
+
+# 5. Add folder used by Aurora that allows batches to be used as inputs
+setup_batch()
 
 PrettyCLI.tprint("Folder structure complete.")
 print("")

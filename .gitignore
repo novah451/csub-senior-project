@@ -4,6 +4,9 @@
 
 log
 model
+miniconda3
+need
+noneed
 predictions
 test
 weather_data

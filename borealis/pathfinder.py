@@ -24,12 +24,13 @@ def pathfinder(board: dict, entry: list[float]) -> pd.DataFrame:
         # "aqi"
     ]
 
+    recursion_counter = 0
     path: pd.DataFrame = pd.DataFrame(columns=columns)
-    path = build_path(board, entry, path)
+    path = build_path(board, entry, path, recursion_counter)
 
     return path
 
-def build_path(board: dict, entry: list[float, float], path: pd.DataFrame) -> pd.DataFrame:
+def build_path(board: dict, entry: list[float, float], path: pd.DataFrame, rc: int) -> pd.DataFrame:
     delta: np.float32 = 0.25
     shift: np.float32 = 0.125
     rride: np.float32 = 0.01
@@ -38,16 +39,16 @@ def build_path(board: dict, entry: list[float, float], path: pd.DataFrame) -> pd
 
     for i in range(0, len(board["board"])):
         if board["board"][i]["center"] == entry:
-            uwind: np.float32 = board["board"][i]["u_wind_change"]
-            vwind: np.float32 = board["board"][i]["v_wind_change"]
-            spc: np.float32 = board["board"][i]["specific_humidity_change"]
-            co: np.float32 = board["board"][i]["co"]
-            no: np.float32 = board["board"][i]["no"]
-            no2: np.float32 = board["board"][i]["no2"]
-            o3: np.float32 = board["board"][i]["o3"]
-            so2: np.float32 = board["board"][i]["so2"]
-            pm2_5: np.float32 = board["board"][i]["pm2_5"]
-            pm10: np.float32 = board["board"][i]["pm10"]
+            uwind: np.float32 = board["board"][i]["weather"]["u_wind_change"]
+            vwind: np.float32 = board["board"][i]["weather"]["v_wind_change"]
+            spc: np.float32 = board["board"][i]["weather"]["specific_humidity_change"]
+            co: np.float32 = board["board"][i]["pollution"]["slr"]["co"]
+            no: np.float32 = board["board"][i]["pollution"]["slr"]["no"]
+            no2: np.float32 = board["board"][i]["pollution"]["slr"]["no2"]
+            o3: np.float32 = board["board"][i]["pollution"]["slr"]["o3"]
+            so2: np.float32 = board["board"][i]["pollution"]["slr"]["so2"]
+            pm2_5: np.float32 = board["board"][i]["pollution"]["slr"]["pm2_5"]
+            pm10: np.float32 = board["board"][i]["pollution"]["slr"]["pm10"]
             # aqi: np.float32 = board["board"][i]["aqi"]
             break
     
@@ -121,13 +122,16 @@ def build_path(board: dict, entry: list[float, float], path: pd.DataFrame) -> pd
             if section[i][0] - shift <= x <= section[i][0] + shift and \
                 section[i][1] - shift <= y <= section[i][1] + shift:
                 # check if the section is outside the bounds of the board
-                if (section[i][0] < 239.75 or section[i][0] > 242.5) or \
-                    (section[i][1] < 34.75 or section[i][1] > 36):
+                if (section[i][0] < 239.75 - shift or section[i][0] > 242.5 + shift) or \
+                    (section[i][1] < 34.75 - shift or section[i][1] > 36 + shift):
                     flag = "break"
                     break
                 
-                # check if the section is looping
-                if section[i][0] == path["lon"][0] and section[i][1] == path["lat"][0]:
+                # check if the section is looping:
+                # if the path is like a big circle, starting a one point and never ending, then kill it
+                # OR if the path has a start but a minor loop within it, then kill it
+                if (section[i][0] == path["lon"][0] and section[i][1] == path["lat"][0]) or \
+                    (rc > 100):
                     flag = "break"
                     break
 
@@ -139,7 +143,8 @@ def build_path(board: dict, entry: list[float, float], path: pd.DataFrame) -> pd
             break
     
     if output:
-        build_path(board, output, path)
+        rc += 1
+        build_path(board, output, path, rc)
 
     return path
 

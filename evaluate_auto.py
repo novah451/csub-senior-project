@@ -15,7 +15,7 @@ def evaluate(board: dict) -> pd.DataFrame:
     for sq in board["board"]:
         path = pathfinder(board, sq["center"])
 
-        if len(path) >= 5:
+        if (len(path) >= 5) and (len(path) < 100):
             paths.append(path)
 
             x_vals = list(range(0, len(path)))
@@ -29,6 +29,7 @@ def evaluate(board: dict) -> pd.DataFrame:
 
             for index, row in path.iterrows():
                 for ind, ap_v in enumerate(air_pollution_variables):
+                    # THERE MAY BE A PROBLEM HERE, SO FIX IT
                     components[ind].append(row[ap_v])
 
             for c in components:
@@ -115,18 +116,21 @@ def evaluate(board: dict) -> pd.DataFrame:
 
 if __name__ == "__main__":
     CURRENT_TIME = datetime(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]), 0, 0)
-    PREVIOUS_TIME = CURRENT_TIME - timedelta(hours=6)
+    times = [CURRENT_TIME]
+    for i in range(1, 5):
+        nt = CURRENT_TIME + timedelta(hours=6*i)
+        times.append(nt)
 
-    SAVE = f"log/components/evaluation_{PREVIOUS_TIME.hour:02d}-{CURRENT_TIME.hour:02d}.csv"
+    for index in range(0, 4):
+        SAVE = f"log/components/forecast/evaluation_{times[index].hour:02d}-{times[index+1].hour:02d}.csv"
+        with open(f'log/components/forecast/board_{times[index].date()}_{times[index].hour:02d}00-{times[index+1].hour:02d}00.json', 'r') as file:
+            board = json.load(file)
 
-    with open(f'log/components/board_{PREVIOUS_TIME.hour:02d}-{CURRENT_TIME.hour:02d}.json', 'r') as file:
-        board = json.load(file)
+        origin_path = evaluate(board)
+        origin = [origin_path.iloc[0]["lon"], origin_path.iloc[0]["lat"]]
 
-    origin_path = evaluate(board)
-    origin = [origin_path.iloc[0]["lon"], origin_path.iloc[0]["lat"]]
+        print("Path from Origin: \n")
+        print(origin_path)
+        print("Origin Square:", origin, "\n")
 
-    print("Path from Origin: \n")
-    print(origin_path)
-    print("Origin Square:", origin, "\n")
-
-    origin_path.to_csv(SAVE, na_rep='null', index=False)
+        origin_path.to_csv(SAVE, na_rep='null', index=False)

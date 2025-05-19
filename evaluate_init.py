@@ -1,10 +1,12 @@
-import json
-from random import randint
 from borealis import pathfinder
+from datetime import datetime
+from datetime import timedelta
+from random import randint
+from sys import argv
+
+import json
 import numpy as np
 import pandas as pd
-
-__all__ = "evaluate"
 
 def evaluate(board: dict) -> pd.DataFrame:
     paths = []
@@ -13,7 +15,7 @@ def evaluate(board: dict) -> pd.DataFrame:
     for sq in board["board"]:
         path = pathfinder(board, sq["center"])
 
-        if len(path) >= 5:
+        if (len(path) >= 5) and (len(path) < 100):
             paths.append(path)
 
             x_vals = list(range(0, len(path)))
@@ -110,3 +112,21 @@ def evaluate(board: dict) -> pd.DataFrame:
         max_in_queue = max(queue)
         max_in_queue_index = queue.index(max_in_queue)
         return paths[maximum_indices[max_in_queue_index]]
+
+if __name__ == "__main__":
+    CURRENT_TIME = datetime(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]), 0, 0)
+    PREVIOUS_TIME = CURRENT_TIME - timedelta(hours=6)
+
+    SAVE = f"log/components/current/evaluation_{PREVIOUS_TIME.hour:02d}00-{CURRENT_TIME.hour:02d}00.csv"
+
+    with open(f'log/components/current/board_{PREVIOUS_TIME.date()}_{PREVIOUS_TIME.hour:02d}00-{CURRENT_TIME.hour:02d}00.json', 'r') as file:
+        board = json.load(file)
+
+    origin_path = evaluate(board)
+    origin = [origin_path.iloc[0]["lon"], origin_path.iloc[0]["lat"]]
+
+    print("Path from Origin: \n")
+    print(origin_path)
+    print("Origin Square:", origin, "\n")
+
+    origin_path.to_csv(SAVE, na_rep='null', index=False)
